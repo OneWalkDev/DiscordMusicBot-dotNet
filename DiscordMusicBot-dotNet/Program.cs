@@ -1,9 +1,10 @@
-﻿using System;
+﻿using DiscordMusicBot_dotNet.Core;
 
 namespace DiscordMusicBot_dotNet {
     class Program {
+
         static void Main(string[] args) {
-            Console.WriteLine("Hello World!");
-        }
+            new Main().MainAsync().GetAwaiter().GetResult();
+        }   
     }
 }
