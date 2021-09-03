@@ -15,12 +15,11 @@ namespace DiscordMusicBot_dotNet.Core {
         private TokenManager _token;
 
         public async Task MainAsync() {
-            using var services = ConfigureServices();
-            _client = services.GetRequiredService<DiscordSocketClient>();
+            _services = ConfigureServices();
+            _client = _services.GetRequiredService<DiscordSocketClient>();
             _client.Log += Log;
-            services.GetRequiredService<CommandService>().Log += Log;
+            _services.GetRequiredService<CommandService>().Log += Log;
             _commands = new CommandService();
-            _services = new ServiceCollection().BuildServiceProvider();
             _client.MessageReceived += CommandRecieved;
             _token = new TokenManager();
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
@@ -50,7 +49,7 @@ namespace DiscordMusicBot_dotNet.Core {
             return new ServiceCollection()
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
-                .AddSingleton<VoiceChatService>()
+                .AddSingleton<AudioService>()
                 .BuildServiceProvider();
         }
 
