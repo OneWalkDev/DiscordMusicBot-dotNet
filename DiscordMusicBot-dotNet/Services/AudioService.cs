@@ -1,13 +1,25 @@
 ﻿using Discord;
 using Discord.Audio;
+using Discord.WebSocket;
+using NAudio.Wave;
+using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
+using YoutubeExplode;
+using YoutubeExplode.Videos.Streams;
 
 namespace DiscordMusicBot_dotNet.Services {
     public class AudioService {
+
         private readonly ConcurrentDictionary<ulong, IAudioClient> ConnectedChannels = new ConcurrentDictionary<ulong, IAudioClient>();
+
+        private static CancellationTokenSource cancellationToken = new CancellationTokenSource();
+
+        private IAudioClient _client;
 
         public async Task JoinAudio(IGuild guild, IVoiceChannel target) {
             IAudioClient client;
@@ -19,6 +31,7 @@ namespace DiscordMusicBot_dotNet.Services {
             }
 
             var audioClient = await target.ConnectAsync();
+            _client = client;
 
             if (ConnectedChannels.TryAdd(guild.Id, audioClient)) {
                 // If you add a method to log happenings from this service,
@@ -35,29 +48,40 @@ namespace DiscordMusicBot_dotNet.Services {
             }
         }
 
-        public async Task SendAudioAsync(IGuild guild, IMessageChannel channel, string path) {
-            // Your task: Get a full path to the file if the value of 'path' is only a filename.
-
-            /* debug */
-            //path = "music.mp3";
-            //path = "output.wav";
-
-            if (!File.Exists(path)) {
-                await channel.SendMessageAsync("File does not exist.");
-                return;
-            }
-            IAudioClient client;
-            if (ConnectedChannels.TryGetValue(guild.Id, out client)) {
-                //await Log(LogSeverity.Debug, $"Starting playback of {path} in {guild.Name}");
-                using (var ffmpeg = CreateProcess(path)) {
-                    using (var stream = client.CreatePCMStream(AudioApplication.Music)) {
-                        try {
-                            await ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream);
-                        } finally {
-                            await stream.FlushAsync();
+        public async Task SendAudioAsync(IGuild guild, IMessageChannel channel, IVoiceChannel target) {
+            AudioOutStream dstream = null;
+            try {
+                using (Stream ms = new MemoryStream()) {
+                    var youtubeClient = new YoutubeClient();
+                    var video = await youtubeClient.Videos.GetAsync(@"https://www.youtube.com/watch?v=aRyjZa89g4o");
+                    var streamManifest = await youtubeClient.Videos.Streams.GetManifestAsync(video.Id);
+                    var url = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate().Url;
+                    using (Stream stream = WebRequest.Create(url).GetResponse().GetResponseStream()) {
+                        byte[] buffer = new byte[32768];
+                        int read;
+                        while ((read = stream.Read(buffer, 0, buffer.Length)) > 0) {
+                            ms.Write(buffer, 0, read);
                         }
                     }
+
+                    ms.Position = 0;
+                    using (WaveStream blockAlignedStream = new BlockAlignReductionStream(WaveFormatConversionStream.CreatePcmStream(new Mp3FileReader(ms)))) {
+
+                        var naudio = WaveFormatConversionStream.CreatePcmStream(blockAlignedStream);
+
+                        dstream = _client.CreatePCMStream(AudioApplication.Music);
+                        byte[] buffer = new byte[naudio.Length];
+
+                        int rest = (int)(naudio.Length - naudio.Position);
+                        await naudio.ReadAsync(buffer, 0, rest);
+                        await dstream.WriteAsync(buffer, 0, rest, cancellationToken.Token);
+
+                    }
                 }
+            } catch (Exception e) {
+                Debug.WriteLine(e.Message);
+                if (e.InnerException != null)
+                    Debug.WriteLine(e.InnerException.Message);
             }
         }
 

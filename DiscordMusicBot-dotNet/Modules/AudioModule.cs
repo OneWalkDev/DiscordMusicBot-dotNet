@@ -19,5 +19,12 @@ namespace DiscordMusicBot_dotNet.Command {
             var user = Context.User as IGuildUser;
             await _service.JoinAudio(Context.Guild, (Context.User as IVoiceState).VoiceChannel);
         }
+
+        [Command("play", RunMode = RunMode.Async)]
+        [Alias("p")]
+        public async Task Play() {
+            var user = Context.User as IGuildUser;
+            await _service.SendAudioAsync(Context.Guild, Context.Channel, (Context.User as IVoiceState).VoiceChannel);
+        }
     }
 }
