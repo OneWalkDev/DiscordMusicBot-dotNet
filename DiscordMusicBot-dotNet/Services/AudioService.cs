@@ -22,7 +22,7 @@ namespace DiscordMusicBot_dotNet.Services {
             var audioClient = await target.ConnectAsync();
 
             ConnectedChannels.TryAdd(guild.Id, audioClient);
-            
+
         }
 
         public async Task LeaveAudio(IGuild guild) {
@@ -32,14 +32,17 @@ namespace DiscordMusicBot_dotNet.Services {
             }
         }
 
-        public async Task SendAudioAsync(IGuild guild, IMessageChannel channel, string url) {
+        public async Task SendAudioAsync(IGuild guild, IMessageChannel channel, IVoiceChannel target, string url) {
+            IAudioClient client;
             var music = DownloadHelper.GetPath(DownloadHelper.getId(url).Result).Result;
-
-            if (!File.Exists(music)) {
-                await DownloadHelper.Download(url, music);
+            if (!ConnectedChannels.TryGetValue(guild.Id, out client)) {
+                await JoinAudio(guild, target);
             }
 
-            IAudioClient client;
+            if (!File.Exists(music)) {
+                await channel.SendMessageAsync("ダウンロードしてるからまって");
+                await DownloadHelper.Download(url, music);
+            }
 
             if (ConnectedChannels.TryGetValue(guild.Id, out client)) {
                 using (var ffmpeg = CreateProcess(music)) {
@@ -51,6 +54,7 @@ namespace DiscordMusicBot_dotNet.Services {
                         }
                     }
                 }
+
             }
         }
 
@@ -62,5 +66,7 @@ namespace DiscordMusicBot_dotNet.Services {
                 RedirectStandardOutput = true
             });
         }
+
     }
 }
+
