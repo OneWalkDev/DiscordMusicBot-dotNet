@@ -8,18 +8,18 @@ using YoutubeExplode.Converter;
 namespace DiscordMusicBot_dotNet {
     class DownloadHelper {
 
-        public static async Task<string> GetId(string url) {
+        public static async Task<Audio.Audio> GetAudio(string url) {
             var youtubeClient = new YoutubeClient();
             var video = await youtubeClient.Videos.GetAsync(url);
-            return video.Id;
+            return new Audio.Audio { Path = GetPath(video.Id), Title = video.Title, Url = video.Url };
         }
 
-        public static async Task<string[]> Search(string str) {
+        public static async Task<Audio.Audio> Search(string str) {
             var youtubeClient = new YoutubeClient();
             await foreach (var result in youtubeClient.Search.GetVideosAsync(str)) {
-                return new string[3] { result.Id, result.Title, result.Url };
+                return new Audio.Audio{Path = result.Id, Title = result.Title, Url = result.Url };
             }
-            return new string[3] { String.Empty, String.Empty, String.Empty };
+            return new Audio.Audio { Path = String.Empty, Title = String.Empty, Url = String.Empty };
         }
 
         public static string GetPath(string id) {

@@ -36,7 +36,7 @@ namespace DiscordMusicBot_dotNet.Core {
             var argPos = 0;
             var context = new SocketCommandContext(_client, message);
 
-            if (message.HasCharPrefix('=', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos)) {
+            if (message.HasCharPrefix('*', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos)) {
                 var result = await _commands.ExecuteAsync(context, argPos, _services);
 
                 if (!result.IsSuccess) {

@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Audio;
 using DiscordMusicBot_dotNet.Assistor;
+using DiscordMusicBot_dotNet.Core;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
@@ -10,6 +11,8 @@ namespace DiscordMusicBot_dotNet.Services {
     public class AudioService {
 
         private readonly ConcurrentDictionary<ulong, IAudioClient> ConnectedChannels = new();
+
+        public AudioPlayer AudioPlayer { get; }
 
         private Process _ffmpeg;
 
@@ -37,36 +40,37 @@ namespace DiscordMusicBot_dotNet.Services {
 
         public async Task SendAudioAsync(IGuild guild, IMessageChannel channel, IVoiceChannel target, string str) {
             IAudioClient client;
-            if (!ConnectedChannels.TryGetValue(guild.Id, out client)) {
+            string music = "";
+            Audio.Audio audio;
+
+            if (!ConnectedChannels.TryGetValue(guild.Id, out _)) {
                 await JoinAudio(guild, target);
             }
 
-            if (_ffmpeg != null) {
-                _ffmpeg.Kill();
-                _ffmpeg = null;
-            }
+            Skip();
 
             var type = DownloadHelper.GetType(str).Result;
-            string music = "";
-
-            if (type == YoutubeType.Video) {
-                music = DownloadHelper.GetPath(DownloadHelper.GetId(str).Result);
-            } else if (type == YoutubeType.Search) {
-                var value = DownloadHelper.Search(str).Result;
-
-                if (value[0] == string.Empty
-                    || value[1] == string.Empty
-                    || value[2] == string.Empty) {
-                    await channel.SendMessageAsync("なかった");
-                    return;
-                }
-
-                music = DownloadHelper.GetPath(value[0]);
-                await channel.SendMessageAsync(value[1] + " を再生します");
-                str = value[2];
+            switch (type) {
+                case YoutubeType.Video:
+                    audio = DownloadHelper.GetAudio(str).Result;
+                    music = audio.Path;
+                    break;
+                case YoutubeType.Search:
+                    audio = DownloadHelper.Search(str).Result;
+                    if (audio.Path == string.Empty
+                        || audio.Title == string.Empty
+                        || audio.Url == string.Empty) {
+                        await channel.SendMessageAsync("なかった");
+                        return;
+                    }
+                    music = DownloadHelper.GetPath(audio.Path);
+                    await channel.SendMessageAsync(audio.Title + " を再生します");
+                    str = audio.Url;
+                    break;
+                case YoutubeType.Playlist:
+                    //Todo
+                    break;
             }
-
-
 
             if (!File.Exists(music)) {
                 await channel.SendMessageAsync("ダウンロードしてるからまって");
@@ -78,6 +82,7 @@ namespace DiscordMusicBot_dotNet.Services {
                 using (var stream = client.CreatePCMStream(AudioApplication.Music)) {
                     try {
                         await _ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream);
+                        _ffmpeg.Dispose();
                         _ffmpeg = null;
                     } finally {
                         await stream.FlushAsync();
@@ -86,11 +91,21 @@ namespace DiscordMusicBot_dotNet.Services {
             }
         }
 
-        public async void SkipAudio() {
+        public async void SkipAudio(IMessageChannel channel) {
+            if (Skip()) await channel.SendMessageAsync("スキップしたよ");
+        }
+
+        public async void StopAudio(IMessageChannel channel) {
+            if (Skip()) await channel.SendMessageAsync("停止したよ");
+        }
+
+        public bool Skip() {
             if (_ffmpeg != null) {
-                _ffmpeg.Kill();
+                _ffmpeg.Dispose();
                 _ffmpeg = null;
+                return true;
             }
+            return false;
         }
 
         private Process CreateProcess(string path) {
