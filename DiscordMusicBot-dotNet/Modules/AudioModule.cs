@@ -37,5 +37,15 @@ namespace DiscordMusicBot_dotNet.Command {
             }
             await _service.SendAudioAsync(Context.Guild, Context.Channel, (Context.User as IVoiceState).VoiceChannel, url[0]);
         }
+
+        [Command("search", RunMode = RunMode.Async)]
+        public async Task Search(params string[] url) {
+            var user = Context.User as IGuildUser;
+            if (url.Length == 0) {
+                await ReplyAsync("むり");
+                return;
+            }
+            await _service.SearchAudioAsync(Context.Guild, Context.Channel, (Context.User as IVoiceState).VoiceChannel, url[0]);
+        }
     }
 }

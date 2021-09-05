@@ -34,14 +34,51 @@ namespace DiscordMusicBot_dotNet.Services {
 
         public async Task SendAudioAsync(IGuild guild, IMessageChannel channel, IVoiceChannel target, string url) {
             IAudioClient client;
-            var music = DownloadHelper.GetPath(DownloadHelper.getId(url).Result).Result;
             if (!ConnectedChannels.TryGetValue(guild.Id, out client)) {
                 await JoinAudio(guild, target);
             }
 
+            var music = DownloadHelper.GetPath(DownloadHelper.GetId(url).Result).Result;
+
             if (!File.Exists(music)) {
                 await channel.SendMessageAsync("ダウンロードしてるからまって");
                 await DownloadHelper.Download(url, music);
+            }
+
+            if (ConnectedChannels.TryGetValue(guild.Id, out client)) {
+                using (var ffmpeg = CreateProcess(music)) {
+                    using (var stream = client.CreatePCMStream(AudioApplication.Music)) {
+                        try {
+                            await ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream);
+                        } finally {
+                            await stream.FlushAsync();
+                        }
+                    }
+                }
+
+            }
+        }
+        public async Task SearchAudioAsync(IGuild guild, IMessageChannel channel, IVoiceChannel target, string str) {
+            IAudioClient client;
+            if (!ConnectedChannels.TryGetValue(guild.Id, out client)) {
+                await JoinAudio(guild, target);
+            }
+            var value = DownloadHelper.Search(str).Result;
+
+            if (   value[0] == string.Empty 
+                || value[1] == string.Empty 
+                || value[2] == string.Empty) {
+                await channel.SendMessageAsync("なかった");
+                return;
+            }
+
+            var music = DownloadHelper.GetPath(value[0]).Result;
+
+            await channel.SendMessageAsync(value[1]+" を再生します");
+
+            if (!File.Exists(music)) {
+                await channel.SendMessageAsync("ダウンロードしてるからまって");
+                await DownloadHelper.Download(value[2], music);
             }
 
             if (ConnectedChannels.TryGetValue(guild.Id, out client)) {
