@@ -22,9 +22,13 @@ namespace DiscordMusicBot_dotNet.Command {
 
         [Command("play", RunMode = RunMode.Async)]
         [Alias("p")]
-        public async Task Play() {
+        public async Task Play(params string[] url) {
             var user = Context.User as IGuildUser;
-            await _service.SendAudioAsync(Context.Guild, Context.Channel, (Context.User as IVoiceState).VoiceChannel);
+            if (url.Length == 0) {
+                await ReplyAsync("むり");
+                return;
+            }
+            await _service.SendAudioAsync(Context.Guild, Context.Channel,url[0]);
         }
     }
 }
