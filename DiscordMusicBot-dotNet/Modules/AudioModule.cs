@@ -72,5 +72,12 @@ namespace DiscordMusicBot_dotNet.Command {
             }
             await _service.SendAudioAsync(Context.Guild, Context.Channel, (Context.User as IVoiceState).VoiceChannel, url[0]);
         }
+
+        [Command("loop", RunMode = RunMode.Async)]
+        public async Task Loop(params string[] url) {
+            var user = Context.User as IGuildUser;
+            _service.ChangeLoop(Context.Channel);
+        }
+
     }
 }

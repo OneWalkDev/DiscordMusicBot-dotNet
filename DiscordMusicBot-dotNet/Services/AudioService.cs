@@ -12,7 +12,7 @@ namespace DiscordMusicBot_dotNet.Services {
 
         private readonly ConcurrentDictionary<ulong, IAudioClient> ConnectedChannels = new();
 
-        public AudioPlayer AudioPlayer { get; }
+        public AudioPlayer _player = new AudioPlayer();
 
         private Process _ffmpeg;
 
@@ -97,6 +97,15 @@ namespace DiscordMusicBot_dotNet.Services {
 
         public async void StopAudio(IMessageChannel channel) {
             if (Skip()) await channel.SendMessageAsync("停止したよ");
+        }
+
+        public async void ChangeLoop(IMessageChannel channel) {
+            _player.Loop = _player.Loop ? false : true;
+            if (_player.Loop) {
+                await channel.SendMessageAsync("ループ >> ON");
+            } else {
+                await channel.SendMessageAsync("ループ >> OFF");
+            }
         }
 
         public bool Skip() {
