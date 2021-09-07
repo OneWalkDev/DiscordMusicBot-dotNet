@@ -47,7 +47,12 @@ namespace DiscordMusicBot_dotNet.Services {
         }
 
         public async Task AddQueue(IGuild guild, IMessageChannel channel, IVoiceChannel target, string str) {
+            if (!ConnectedChannels.TryGetValue(guild.Id, out _)) {
+                await JoinAudio(guild, target);
+            }
+
             Audio.Audio music;
+
             try {
                 music = _queue.GetAudioforString(str).Result;
             } catch (SearchNotFoundException) {
@@ -55,16 +60,16 @@ namespace DiscordMusicBot_dotNet.Services {
                 return;
             }
 
-            var path = music.Path;
-
-            if (!File.Exists(path) && !_queue.IsQueueinMusic()) {
+            if (!File.Exists(music.Path)) {
                 await channel.SendMessageAsync("ダウンロードしてるからまって");
-                await DownloadHelper.Download(str, path);
+                await DownloadHelper.Download(music.Url, music.Path);
             }
 
             _queue.AddQueue(music);
 
-            if(_queue.GetQueueCount() == 1) {
+            await channel.SendMessageAsync("追加 >> "+music.Title);
+
+            if (_queue.GetQueueCount() == 1) {
                 await SendAudioAsync(guild, channel, target, music);
             }
         }
@@ -75,30 +80,37 @@ namespace DiscordMusicBot_dotNet.Services {
                 await JoinAudio(guild, target);
             }
 
-            Skip();
-
             var path = music.Path;
 
             if (ConnectedChannels.TryGetValue(guild.Id, out client)) {
                 _ffmpeg = CreateProcess(path);
                 using (var stream = client.CreatePCMStream(AudioApplication.Music)) {
                     try {
+                        await channel.SendMessageAsync("再生 >> "+music.Title);
                         await _ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream);
                         _ffmpeg.Dispose();
-                        _ffmpeg = null;
                     } finally {
+                        _ffmpeg = null;
                         await stream.FlushAsync();
                     }
+                    var next = _queue.Next();
+                    if (next == null)
+                        return;
+                    SendAudioAsync(guild, channel, target, next);
                 }
             }
         }
 
-        public async void SkipAudio(IMessageChannel channel) {
-            if (Skip()) await channel.SendMessageAsync("スキップしたよ");
+        public async void SkipAudio(IGuild guild, IMessageChannel channel, IVoiceChannel target) {
+            if (Next(guild,channel,target).Result) await channel.SendMessageAsync("スキップしたよ");
         }
 
         public async void StopAudio(IMessageChannel channel) {
-            if (Skip()) await channel.SendMessageAsync("停止したよ");
+           if(_ffmpeg != null) {
+                _ffmpeg.Dispose();
+                _ffmpeg = null;
+            }
+            _queue.Reset();
         }
 
         public async void ChangeLoop(IMessageChannel channel) {
@@ -119,11 +131,12 @@ namespace DiscordMusicBot_dotNet.Services {
             }
         }
 
-        public bool Skip() {
+        public async Task<bool> Next(IGuild guild, IMessageChannel channel, IVoiceChannel target) {
             if (_ffmpeg != null) {
-                _ffmpeg.Dispose();
-                _ffmpeg = null;
-                return true;
+                var next = _queue.Next();
+                if (next == null)
+                    return false;
+                await SendAudioAsync(guild, channel, target, next);
             }
             return false;
         }

@@ -54,7 +54,7 @@ namespace DiscordMusicBot_dotNet.Command {
         [Alias("s")]
         public async Task Skip() {
             var user = Context.User as IGuildUser;
-            _service.SkipAudio(Context.Channel);
+            _service.SkipAudio(Context.Guild, Context.Channel, (Context.User as IVoiceState).VoiceChannel);
         }
 
         [Command("stop", RunMode = RunMode.Async)]

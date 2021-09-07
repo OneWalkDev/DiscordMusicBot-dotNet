@@ -12,7 +12,7 @@ namespace DiscordMusicBot_dotNet.Audio {
 
         private AudioPlayer _player;
 
-        private List<Audio> queue = new List<Audio>();
+        private List<Audio> _queue = new();
 
         public QueueManager(AudioPlayer player) {
             _player = player;
@@ -47,57 +47,68 @@ namespace DiscordMusicBot_dotNet.Audio {
         }
 
         public void AddQueue(Audio audio) {
-            queue.Add(audio);
+            _queue.Add(audio);
         }
 
         public void RemoveQueue(int index) {
-            queue.RemoveAt(index);
+            _queue.RemoveAt(index);
         }
 
         public Audio GetAudio() {
-            return queue[_player.NowQueue];
+            return _queue[_player.NowQueue];
         }
 
         public int GetQueueCount() {
-            return queue.Count();
+            return _queue.Count();
         }
 
         public bool IsQueueinMusic() {
-            return queue.Count != 0;
+            return _queue.Count != 0;
         }
 
         public string[] GetQueueMusicTitles() {
-            string[] titles = new string[queue.Count];
-            foreach(var item in queue.Select((value, index) => new { index, value })) 
+            string[] titles = new string[_queue.Count];
+            foreach(var item in _queue.Select((value, index) => new { index, value })) 
                 titles[item.index] = item.value.Title;
             return titles;
         }
 
         public Audio getMusicinQueue(int index) {
-            if (queue.Count < index) throw new QueueNotFoundException("indexが存在しません");
-            return queue[index];
+            if (_queue.Count < index) throw new QueueNotFoundException("indexが存在しません");
+            return _queue[index];
         }
 
         public Audio Next() {
-            if(queue.Count >= _player.NowQueue) {
-                _player.NowQueue += 1;
-                return queue[_player.NowQueue];
-            } else {
-                _player.NowQueue = 0;
-                if (_player.Loop) {
-                    return queue[_player.NowQueue];
+            if (_player.Loop) {
+                if (_queue.Count >= _player.NowQueue) {
+                    _player.NowQueue += 1;
+                    return _queue[_player.NowQueue];
+                } else {
+                    _player.NowQueue = 0;
+                    return _queue[_player.NowQueue];
                 }
                 return null;
             }
+            RemoveQueue(0);
+            if (_queue.Count == 0) return null;
+            return _queue[0];
         }
+
 
         public int GetRandomIndex() {
             while (true) {
-                var rand = new Random().Next(0, queue.Count);
+                var rand = new Random().Next(0, _queue.Count);
                 if (rand != _player.NowQueue) {
                     return rand;
                 }
             }
+        }
+
+        public void Reset() {
+            _queue = new();
+            _player.NowQueue = 0;
+            _player.Loop = false;
+            _player.Shuffle = false;
         }
     }
 }
