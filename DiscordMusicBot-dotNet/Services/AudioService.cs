@@ -3,10 +3,8 @@ using Discord.Audio;
 using DiscordMusicBot_dotNet.Assistor;
 using DiscordMusicBot_dotNet.Audio;
 using DiscordMusicBot_dotNet.Core;
-using DiscordMusicBot_dotNet.Exception;
 using NAudio.Wave;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -92,10 +90,7 @@ namespace DiscordMusicBot_dotNet.Services {
         }
 
         public async void StopAudio(IGuild guild, IMessageChannel channel) {
-            AudioContainer container;
-            _connectedChannels.TryGetValue(guild.Id, out container);
             //Todo
-            container.QueueManager.Reset();
         }
 
         public async void ChangeLoop(IGuild guild, IMessageChannel channel) {
@@ -123,14 +118,19 @@ namespace DiscordMusicBot_dotNet.Services {
         }
 
         public async Task<bool> Next(IGuild guild, IMessageChannel channel, IVoiceChannel target) {
-            //Todo
             AudioContainer container;
-            _connectedChannels.TryGetValue(guild.Id, out container);
-            var next = container.QueueManager.Next();
-            if (next == null)
+            if (_connectedChannels.TryGetValue(guild.Id, out container)) {
+                container.CancellationTokenSource.Cancel();
+                var next = container.QueueManager.Next();
+                if (next == null)
+                    return false;
+                SendAudioAsync(guild, channel, target, next);
+                return true;
+            } else {
+                await channel.SendMessageAsync("いまいない");
                 return false;
-            SendAudioAsync(guild, channel, target, next);
-            return true;
+            }
+            
         }
 
     }
