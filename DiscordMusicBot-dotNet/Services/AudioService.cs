@@ -4,100 +4,86 @@ using DiscordMusicBot_dotNet.Assistor;
 using DiscordMusicBot_dotNet.Audio;
 using DiscordMusicBot_dotNet.Core;
 using DiscordMusicBot_dotNet.Exception;
+using NAudio.Wave;
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DiscordMusicBot_dotNet.Services {
     public class AudioService {
 
-        private readonly ConcurrentDictionary<ulong, IAudioClient> ConnectedChannels = new();
-
-        private QueueManager _queue;
-
-        private  readonly AudioPlayer _player = new();
-
-        private Process _ffmpeg;
-
-        public AudioService() {
-            _queue = new QueueManager(_player);
-        }
+        private readonly ConcurrentDictionary<ulong, AudioContainer> _connectedChannels = new();
 
         public async Task JoinAudio(IGuild guild, IVoiceChannel target) {
-            IAudioClient client;
-            if (ConnectedChannels.TryGetValue(guild.Id, out client)) {
+            if (_connectedChannels.TryGetValue(guild.Id, out _)) {
                 return;
             }
             if (target.Guild.Id != guild.Id) {
                 return;
             }
 
-            var audioClient = await target.ConnectAsync();
-
-            ConnectedChannels.TryAdd(guild.Id, audioClient);
-
+            var player = new AudioPlayer();
+            var Container = new AudioContainer {
+                AudioClient = await target.ConnectAsync(),
+                CancellationTokenSource = new CancellationTokenSource(),
+                QueueManager = new QueueManager(player),
+            };
+            Container.AudioOutStream = Container.AudioClient.CreatePCMStream(AudioApplication.Music, bitrate: 128000);
+            _connectedChannels.TryAdd(guild.Id, Container);
         }
 
         public async Task LeaveAudio(IGuild guild) {
-            IAudioClient client;
-            if (ConnectedChannels.TryRemove(guild.Id, out client)) {
-                await client.StopAsync();
+            AudioContainer container;
+            if (_connectedChannels.TryRemove(guild.Id, out container)) {
+                await container.AudioClient.StopAsync();
             }
         }
 
         public async Task AddQueue(IGuild guild, IMessageChannel channel, IVoiceChannel target, string str) {
-            if (!ConnectedChannels.TryGetValue(guild.Id, out _)) {
+            AudioContainer container;
+            if (!_connectedChannels.TryGetValue(guild.Id, out container)) {
                 await JoinAudio(guild, target);
             }
 
             Audio.Audio music;
 
+            _connectedChannels.TryGetValue(guild.Id, out container);
+
             try {
-                music = _queue.GetAudioforString(str).Result;
-            } catch (SearchNotFoundException) {
+                music = container.QueueManager.GetAudioforString(str).Result;
+            } catch (System.Exception) {
                 await channel.SendMessageAsync("なかった");
                 return;
             }
 
-            if (!File.Exists(music.Path)) {
-                await channel.SendMessageAsync("ダウンロードしてるからまって");
-                await DownloadHelper.Download(music.Url, music.Path);
-            }
-
-            _queue.AddQueue(music);
+            container.QueueManager.AddQueue(music);
 
             await channel.SendMessageAsync("追加 >> "+music.Title);
 
-            if (_queue.GetQueueCount() == 1) {
+            if (container.QueueManager.GetQueueCount() == 1) {
                 await SendAudioAsync(guild, channel, target, music);
             }
         }
 
         public async Task SendAudioAsync(IGuild guild, IMessageChannel channel, IVoiceChannel target,Audio.Audio music) {
-            IAudioClient client;
-            if (!ConnectedChannels.TryGetValue(guild.Id, out _)) {
-                await JoinAudio(guild, target);
-            }
+            AudioContainer container;
+            _connectedChannels.TryGetValue(guild.Id, out container);
 
-            var path = music.Path;
+            var audioOutStream = container.AudioOutStream;
+            var token = container.CancellationTokenSource.Token;
 
-            if (ConnectedChannels.TryGetValue(guild.Id, out client)) {
-                _ffmpeg = CreateProcess(path);
-                using (var stream = client.CreatePCMStream(AudioApplication.Music)) {
-                    try {
-                        await channel.SendMessageAsync("再生 >> "+music.Title);
-                        await _ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream);
-                        _ffmpeg.Dispose();
-                    } finally {
-                        _ffmpeg = null;
-                        await stream.FlushAsync();
-                    }
-                    var next = _queue.Next();
-                    if (next == null)
-                        return;
-                    SendAudioAsync(guild, channel, target, next);
-                }
+            var format = new WaveFormat(48000, 16, 2);
+            using var reader = new MediaFoundationReader(music.Path);
+            using var resamplerDmo = new ResamplerDmoStream(reader, format);
+
+            try {
+                container.ResamplerDmoStream = resamplerDmo;
+                await resamplerDmo.CopyToAsync(audioOutStream, token)
+                   .ContinueWith(t => { return; });
+            } finally {
+                await audioOutStream.FlushAsync();
+                container.CancellationTokenSource = new CancellationTokenSource();
             }
         }
 
@@ -105,26 +91,31 @@ namespace DiscordMusicBot_dotNet.Services {
             if (Next(guild,channel,target).Result) await channel.SendMessageAsync("スキップしたよ");
         }
 
-        public async void StopAudio(IMessageChannel channel) {
-           if(_ffmpeg != null) {
-                _ffmpeg.Dispose();
-                _ffmpeg = null;
-            }
-            _queue.Reset();
+        public async void StopAudio(IGuild guild, IMessageChannel channel) {
+            AudioContainer container;
+            _connectedChannels.TryGetValue(guild.Id, out container);
+            //Todo
+            container.QueueManager.Reset();
         }
 
-        public async void ChangeLoop(IMessageChannel channel) {
-            _player.Loop = _player.Loop ? false : true;
-            if (_player.Loop) {
+        public async void ChangeLoop(IGuild guild, IMessageChannel channel) {
+            AudioContainer container;
+            _connectedChannels.TryGetValue(guild.Id, out container);
+            var player = container.QueueManager.GetAudioPlayer();
+            player.Loop = player.Loop ? false : true;
+            if (player.Loop) {
                 await channel.SendMessageAsync("ループ >> ON");
             } else {
                 await channel.SendMessageAsync("ループ >> OFF");
             }
         }
 
-        public async void ChangeShuffle(IMessageChannel channel) {
-            _player.Shuffle = _player.Shuffle ? false : true;
-            if (_player.Shuffle) {
+        public async void ChangeShuffle(IGuild guild, IMessageChannel channel) {
+            AudioContainer container;
+            _connectedChannels.TryGetValue(guild.Id, out container);
+            var player = container.QueueManager.GetAudioPlayer();
+            player.Shuffle = player.Shuffle ? false : true;
+            if (player.Shuffle) {
                 await channel.SendMessageAsync("シャッフル >> ON");
             } else {
                 await channel.SendMessageAsync("シャッフル >> OFF");
@@ -132,30 +123,14 @@ namespace DiscordMusicBot_dotNet.Services {
         }
 
         public async Task<bool> Next(IGuild guild, IMessageChannel channel, IVoiceChannel target) {
-            if (_ffmpeg != null) {
-                var next = _queue.Next();
-                if (next == null)
-                    return false;
-                await SendAudioAsync(guild, channel, target, next);
-            }
-            return false;
-        }
-
-        private Process CreateProcess(string path) {
-            return Process.Start(new ProcessStartInfo {
-                FileName = "ffmpeg.exe",
-                Arguments = $"-hide_banner -loglevel panic -i \"{path}\" -ac 2 -f s16le -ar 48000 pipe:1",
-                UseShellExecute = false,
-                RedirectStandardOutput = true
-            });
-        }
-
-        public AudioPlayer GetAudioPlayer() {
-            return _player;
-        }
-
-        public QueueManager GetQueueManager() {
-            return _queue;
+            //Todo
+            AudioContainer container;
+            _connectedChannels.TryGetValue(guild.Id, out container);
+            var next = container.QueueManager.Next();
+            if (next == null)
+                return false;
+            SendAudioAsync(guild, channel, target, next);
+            return true;
         }
 
     }

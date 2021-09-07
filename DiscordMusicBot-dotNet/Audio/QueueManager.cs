@@ -1,5 +1,4 @@
-﻿using Discord;
-using DiscordMusicBot_dotNet.Assistor;
+﻿using DiscordMusicBot_dotNet.Assistor;
 using DiscordMusicBot_dotNet.Core;
 using DiscordMusicBot_dotNet.Exception;
 using System;
@@ -35,7 +34,7 @@ namespace DiscordMusicBot_dotNet.Audio {
                     if (audio.Path == string.Empty
                         || audio.Title == string.Empty
                         || audio.Url == string.Empty) {
-                        throw new SearchNotFoundException("見つかりませんでした。");
+                        throw new SearchNotFoundException("なかった");
                     }
                     break;
 
@@ -56,6 +55,10 @@ namespace DiscordMusicBot_dotNet.Audio {
 
         public Audio GetAudio() {
             return _queue[_player.NowQueue];
+        }
+
+        public AudioPlayer GetAudioPlayer() {
+            return _player;
         }
 
         public int GetQueueCount() {

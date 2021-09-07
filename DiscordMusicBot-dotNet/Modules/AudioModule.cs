@@ -60,7 +60,7 @@ namespace DiscordMusicBot_dotNet.Command {
         [Command("stop", RunMode = RunMode.Async)]
         public async Task Stop() {
             var user = Context.User as IGuildUser;
-            _service.StopAudio(Context.Channel);
+            _service.StopAudio(Context.Guild, Context.Channel);
         }
 
         [Command("search", RunMode = RunMode.Async)]
@@ -76,13 +76,13 @@ namespace DiscordMusicBot_dotNet.Command {
         [Command("loop", RunMode = RunMode.Async)]
         public async Task Loop(params string[] url) {
             var user = Context.User as IGuildUser;
-            _service.ChangeLoop(Context.Channel);
+            _service.ChangeLoop(Context.Guild, Context.Channel);
         }
 
         [Command("shuffle", RunMode = RunMode.Async)]
         public async Task Shuffle(params string[] url) {
             var user = Context.User as IGuildUser;
-            _service.ChangeShuffle(Context.Channel);
+            _service.ChangeShuffle(Context.Guild, Context.Channel);
         }
     }
 }

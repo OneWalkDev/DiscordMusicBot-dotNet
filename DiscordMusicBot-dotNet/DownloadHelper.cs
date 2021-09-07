@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using YoutubeExplode;
 using YoutubeExplode.Converter;
+using YoutubeExplode.Videos.Streams;
 
 namespace DiscordMusicBot_dotNet {
     class DownloadHelper {
@@ -11,13 +12,17 @@ namespace DiscordMusicBot_dotNet {
         public static async Task<Audio.Audio> GetAudio(string url) {
             var youtubeClient = new YoutubeClient();
             var video = await youtubeClient.Videos.GetAsync(url);
-            return new Audio.Audio { Path = GetPath(video.Id), Title = video.Title, Url = video.Url };
+            var streamManifest = await youtubeClient.Videos.Streams.GetManifestAsync(video.Id);
+            var streamUrl = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate().Url;
+            return new Audio.Audio { Path = streamUrl, Title = video.Title, Url = video.Url };
         }
 
         public static async Task<Audio.Audio> Search(string str) {
             var youtubeClient = new YoutubeClient();
             await foreach (var result in youtubeClient.Search.GetVideosAsync(str)) {
-                return new Audio.Audio{Path = GetPath(result.Id), Title = result.Title, Url = result.Url };
+                var streamManifest = await youtubeClient.Videos.Streams.GetManifestAsync(result.Id);
+                var url = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate().Url;
+                return new Audio.Audio { Path = url, Title = result.Title, Url = result.Url };
             }
             return new Audio.Audio { Path = String.Empty, Title = String.Empty, Url = String.Empty };
         }
