@@ -47,7 +47,7 @@ namespace DiscordMusicBot_dotNet.Command {
                 await ReplyAsync("むり");
                 return;
             }
-            await _service.SendAudioAsync(Context.Guild, Context.Channel, (Context.User as IVoiceState).VoiceChannel, url[0]);
+            await _service.AddQueue(Context.Guild, Context.Channel, (Context.User as IVoiceState).VoiceChannel, url[0]);
         }
 
         [Command("skip", RunMode = RunMode.Async)]
@@ -70,7 +70,7 @@ namespace DiscordMusicBot_dotNet.Command {
                 await ReplyAsync("むり");
                 return;
             }
-            await _service.SendAudioAsync(Context.Guild, Context.Channel, (Context.User as IVoiceState).VoiceChannel, url[0]);
+            //Todo
         }
 
         [Command("loop", RunMode = RunMode.Async)]
@@ -79,5 +79,10 @@ namespace DiscordMusicBot_dotNet.Command {
             _service.ChangeLoop(Context.Channel);
         }
 
+        [Command("shuffle", RunMode = RunMode.Async)]
+        public async Task Shuffle(params string[] url) {
+            var user = Context.User as IGuildUser;
+            _service.ChangeShuffle(Context.Channel);
+        }
     }
 }

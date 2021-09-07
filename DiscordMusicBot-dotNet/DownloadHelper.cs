@@ -17,7 +17,7 @@ namespace DiscordMusicBot_dotNet {
         public static async Task<Audio.Audio> Search(string str) {
             var youtubeClient = new YoutubeClient();
             await foreach (var result in youtubeClient.Search.GetVideosAsync(str)) {
-                return new Audio.Audio{Path = result.Id, Title = result.Title, Url = result.Url };
+                return new Audio.Audio{Path = GetPath(result.Id), Title = result.Title, Url = result.Url };
             }
             return new Audio.Audio { Path = String.Empty, Title = String.Empty, Url = String.Empty };
         }
@@ -40,7 +40,7 @@ namespace DiscordMusicBot_dotNet {
                 var playlist = await youtube.Playlists.GetAsync(url);
                 youtube.Playlists.GetVideosAsync(playlist.Id);
                 value = YoutubeType.Playlist;
-            } catch (Exception e) {
+            } catch (System.Exception e) {
                 if (e is ArgumentException || e is YoutubeExplode.Exceptions.PlaylistUnavailableException) {
                     try {
                         var youtubeClient = new YoutubeClient();
