@@ -15,8 +15,7 @@ namespace DiscordMusicBot_dotNet.Command {
         }
 
         [Command("help", RunMode = RunMode.Async)]
-        public async Task help() {
-            var user = Context.User as IGuildUser;
+        public async Task Help() {
             var embed = new EmbedBuilder();
             embed.WithTitle("DiscordMusicBot.NET ヘルプ");
             embed.WithColor(Color.Blue);
