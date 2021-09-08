@@ -66,11 +66,11 @@ namespace DiscordMusicBot_dotNet.Command {
             return Task.CompletedTask;
         }
 
-        [Command("stop", RunMode = RunMode.Async)]
+        /*[Command("stop", RunMode = RunMode.Async)]
         public Task Stop() {
             _service.StopAudio(Context.Guild, Context.Channel);
             return Task.CompletedTask;
-        }
+        }*/
 
         [Command("search", RunMode = RunMode.Async)]
         public async Task Search(params string[] url) {

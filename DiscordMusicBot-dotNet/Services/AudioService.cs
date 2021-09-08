@@ -40,35 +40,40 @@ namespace DiscordMusicBot_dotNet.Services {
         }
 
         public async Task LeaveAudio(IGuild guild) {
-            AudioContainer container;
-            if (_connectedChannels.TryRemove(guild.Id, out container)) {
+            if (_connectedChannels.TryRemove(guild.Id, out AudioContainer container)) {
                 await container.AudioClient.StopAsync();
             }
         }
 
         public async Task AddQueue(IGuild guild, IMessageChannel channel, IVoiceChannel target, string str) {
-            AudioContainer container;
-            if (!_connectedChannels.TryGetValue(guild.Id, out container)) {
+            if (!_connectedChannels.TryGetValue(guild.Id, out _)) {
                 await JoinAudio(guild, target);
             }
 
-            Audio.Audio music;
+            Audio.Audio[] audios;
 
-            _connectedChannels.TryGetValue(guild.Id, out container);
+            _connectedChannels.TryGetValue(guild.Id, out AudioContainer container);
 
             try {
-                music = container.QueueManager.GetAudioforString(str).Result;
+                audios = container.QueueManager.GetAudioforString(str);
             } catch (System.Exception) {
                 await channel.SendMessageAsync("なかった");
                 return;
             }
 
-            container.QueueManager.AddQueue(music);
+            var play = false;
 
-            await channel.SendMessageAsync("追加 >> " + music.Title);
+            if (container.QueueManager.GetQueueCount() == 0)
+                play = true;
 
-            if (container.QueueManager.GetQueueCount() == 1)
-                await SendAudioAsync(guild, channel, music);
+            foreach (var music in audios) {
+                container.QueueManager.AddQueue(music);
+                await channel.SendMessageAsync("追加 >> " + music.Title);
+                if (play) {
+                    SendAudioAsync(guild, channel, music);
+                    play = false;
+                }
+            }
         }
 
         public async Task SendAudioAsync(IGuild guild, IMessageChannel channel, Audio.Audio music) {
@@ -106,7 +111,7 @@ namespace DiscordMusicBot_dotNet.Services {
             }
         }
 
-        public async void StopAudio(IGuild guild, IMessageChannel channel) {
+        public async void ResetAudio(IGuild guild, IMessageChannel channel) {
             //Todo
         }
 
@@ -153,10 +158,9 @@ namespace DiscordMusicBot_dotNet.Services {
                     await channel.SendMessageAsync("何も再生してないよ");
                     return;
                 }
-                await channel.SendMessageAsync(titles.Length.ToString());
                 var maxpage = Math.Ceiling(titles.Length / 10.0);
-                var description = "ページ "+ num +"/" + maxpage+"\n";
-                for (int i = 0 + 10 * (num - 1); i <= 10 + 10 * (num - 1); i++) {
+                var description = "ページ "+ num +"/" + maxpage+"\n\n";
+                for (int i = 0 + 10 * (num - 1); i < 10 + 10 * (num - 1); i++) {
                     if (titles.Length == i) break;
                     var number = i + 1;
                     description += number + " : " + titles[i] + "\n";

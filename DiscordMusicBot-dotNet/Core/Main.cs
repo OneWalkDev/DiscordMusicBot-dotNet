@@ -25,6 +25,7 @@ namespace DiscordMusicBot_dotNet.Core {
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
             await _client.LoginAsync(TokenType.Bot, _token.DiscordToken);
             await _client.StartAsync();
+            await _client.SetGameAsync(null);
             await Task.Delay(-1);
         }
 

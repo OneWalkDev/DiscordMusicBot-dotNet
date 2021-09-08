@@ -17,23 +17,24 @@ namespace DiscordMusicBot_dotNet.Audio {
             _player = player;
         }
 
-        public async Task<Audio> GetAudioforString(string str) {
-            Audio audio;
+        public Audio[] GetAudioforString(string str) {
+            Audio[] audio;
             switch (DownloadHelper.GetType(str).Result) {
                 case YoutubeType.Video:
-                    audio = DownloadHelper.GetAudio(str).Result;
+                    audio = new Audio[1];
+                    audio[0] = DownloadHelper.GetAudio(str).Result;
                     break;
 
                 case YoutubeType.Playlist:
-                    //Todo
-                    audio = null;
+                    audio = DownloadHelper.GetPlayListAudios(str).Result;
                     break;
 
                 case YoutubeType.Search:
-                    audio = DownloadHelper.Search(str).Result;
-                    if (audio.Path == string.Empty
-                        || audio.Title == string.Empty
-                        || audio.Url == string.Empty) {
+                    audio = new Audio[1];
+                    audio[0] = DownloadHelper.Search(str).Result;
+                    if (audio[0].Path == string.Empty
+                        || audio[0].Title == string.Empty
+                        || audio[0].Url == string.Empty) {
                         throw new SearchNotFoundException("なかった");
                     }
                     break;
@@ -42,8 +43,10 @@ namespace DiscordMusicBot_dotNet.Audio {
                     audio = null;
                     break;
             }
+            
             return audio;
         }
+
 
         public void AddQueue(Audio audio) {
             _queue.Add(audio);
