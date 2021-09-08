@@ -70,6 +70,7 @@ namespace DiscordMusicBot_dotNet.Audio {
         }
 
         public string[] GetQueueMusicTitles() {
+            if (_queue.Count == 0) return null;
             string[] titles = new string[_queue.Count];
             foreach (var item in _queue.Select((value, index) => new { index, value }))
                 titles[item.index] = item.value.Title;
