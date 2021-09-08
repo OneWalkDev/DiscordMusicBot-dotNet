@@ -74,15 +74,24 @@ namespace DiscordMusicBot_dotNet.Command {
         }
 
         [Command("loop", RunMode = RunMode.Async)]
-        public async Task Loop(params string[] url) {
+        public Task Loop(params string[] url) {
             var user = Context.User as IGuildUser;
             _service.ChangeLoop(Context.Guild, Context.Channel);
+            return Task.CompletedTask;
+        }
+
+        [Command("qloop", RunMode = RunMode.Async)]
+        public Task QLoop(params string[] url) {
+            var user = Context.User as IGuildUser;
+            _service.ChangeQueueLoop(Context.Guild, Context.Channel);
+            return Task.CompletedTask;
         }
 
         [Command("shuffle", RunMode = RunMode.Async)]
-        public async Task Shuffle(params string[] url) {
+        public Task Shuffle(params string[] url) {
             var user = Context.User as IGuildUser;
             _service.ChangeShuffle(Context.Guild, Context.Channel);
+            return Task.CompletedTask;
         }
     }
 }

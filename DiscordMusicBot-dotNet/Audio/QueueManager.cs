@@ -71,7 +71,7 @@ namespace DiscordMusicBot_dotNet.Audio {
 
         public string[] GetQueueMusicTitles() {
             string[] titles = new string[_queue.Count];
-            foreach(var item in _queue.Select((value, index) => new { index, value })) 
+            foreach (var item in _queue.Select((value, index) => new { index, value }))
                 titles[item.index] = item.value.Title;
             return titles;
         }
@@ -82,7 +82,7 @@ namespace DiscordMusicBot_dotNet.Audio {
         }
 
         public Audio Next() {
-            if (_player.Loop) {
+            if (_player.QueueLoop) {
                 if (_queue.Count >= _player.NowQueue) {
                     _player.NowQueue += 1;
                     return _queue[_player.NowQueue];
@@ -90,9 +90,10 @@ namespace DiscordMusicBot_dotNet.Audio {
                     _player.NowQueue = 0;
                     return _queue[_player.NowQueue];
                 }
-                return null;
             }
-            RemoveQueue(0);
+            if (!_player.Loop) {
+                RemoveQueue(0);
+            }
             if (_queue.Count == 0) return null;
             return _queue[0];
         }

@@ -7,6 +7,8 @@ namespace DiscordMusicBot_dotNet.Core {
         public PlaybackState PlaybackState { get; set; }
 
         public bool Loop { get; set; }
+
+        public bool QueueLoop { get; set; }
         
         public bool Shuffle { get; set; }
 
