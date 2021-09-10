@@ -56,6 +56,7 @@ namespace DiscordMusicBot_dotNet.Command {
                 await ReplyAsync("むり");
                 return;
             }
+            await ReplyAsync("ロード中...");
             await _service.AddQueue(Context.Guild, Context.Channel, (Context.User as IVoiceState).VoiceChannel, url[0]);
         }
 

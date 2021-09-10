@@ -7,6 +7,7 @@ using DiscordMusicBot_dotNet.Core;
 using NAudio.Wave;
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -66,13 +67,24 @@ namespace DiscordMusicBot_dotNet.Services {
             if (container.QueueManager.GetQueueCount() == 0)
                 play = true;
 
-            foreach (var music in audios) {
-                container.QueueManager.AddQueue(music);
-                await channel.SendMessageAsync("追加 >> " + music.Title);
-                if (play) {
-                    SendAudioAsync(guild, channel, music);
-                    play = false;
-                }
+            var description = "";
+            
+            foreach (var music in audios.Select((value, index) => new { value, index })) {
+                container.QueueManager.AddQueue(music.value);
+                var num = music.index + 1;
+                description += num +" : " + music.value.Title+"\n";
+            }
+
+            var embed = new EmbedBuilder();
+            embed.WithTitle("追加");
+            embed.WithColor(Color.Red);
+            embed.WithTimestamp(DateTime.Now);
+            embed.WithDescription(description);
+            await channel.SendMessageAsync(embed: embed.Build());
+
+            if (play) {
+                SendAudioAsync(guild, channel, container.QueueManager.GetAudio());
+                play = false;
             }
         }
 
@@ -89,14 +101,14 @@ namespace DiscordMusicBot_dotNet.Services {
 
                 try {
                     container.ResamplerDmoStream = resamplerDmo;
-                    await resamplerDmo.CopyToAsync(audioOutStream, token).ContinueWith(t => { return; });
+                    await resamplerDmo.CopyToAsync(audioOutStream, token);
                 } finally {
                     await audioOutStream.FlushAsync();
                     await _discord.SetGameAsync(null);
                     container.CancellationTokenSource = new CancellationTokenSource();
                     var next = container.QueueManager.Next();
                     if (next != null)
-                        await SendAudioAsync(guild, channel, next);
+                        SendAudioAsync(guild, channel, next);
                 }
             }
         }

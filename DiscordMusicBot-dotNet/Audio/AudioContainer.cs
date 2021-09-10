@@ -1,6 +1,5 @@
 ﻿using Discord.Audio;
 using DiscordMusicBot_dotNet.Audio;
-using DiscordMusicBot_dotNet.Core;
 using NAudio.Wave;
 using System.Threading;
 
