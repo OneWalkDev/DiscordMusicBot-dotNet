@@ -51,13 +51,18 @@ namespace DiscordMusicBot_dotNet.Command {
 
         [Command("play", RunMode = RunMode.Async)]
         [Alias("p")]
-        public async Task Play(params string[] url) {
-            if (url.Length == 0) {
+        public async Task Play(params string[] str) {
+            var url = "";
+            if (str.Length == 0) {
                 await ReplyAsync("むり");
                 return;
             }
+
+            foreach(var word in str) 
+                url += word + " ";
+
             await ReplyAsync("ロード中...");
-            await _service.AddQueue(Context.Guild, Context.Channel, (Context.User as IVoiceState).VoiceChannel, url[0]);
+            await _service.AddQueue(Context.Guild, Context.Channel, (Context.User as IVoiceState).VoiceChannel, str[0]);
         }
 
         [Command("skip", RunMode = RunMode.Async)]
@@ -113,6 +118,12 @@ namespace DiscordMusicBot_dotNet.Command {
         [Command("shuffle", RunMode = RunMode.Async)]
         public Task Shuffle(params string[] url) {
             _service.ChangeShuffle(Context.Guild, Context.Channel);
+            return Task.CompletedTask;
+        }
+
+        [Command("Reset", RunMode = RunMode.Async)]
+        public Task Reset(params string[] url) {
+            _service.ResetAudio(Context.Guild, Context.Channel);
             return Task.CompletedTask;
         }
     }

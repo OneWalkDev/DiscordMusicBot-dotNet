@@ -21,8 +21,7 @@ namespace DiscordMusicBot_dotNet.Audio {
             Audio audio;
             switch (type) {
                 case YoutubeType.Video:
-                    audio = DownloadHelper.GetAudio(str).Result;
-                    break;
+                    return DownloadHelper.GetAudio(str).Result;
 
                 case YoutubeType.Search:
                     audio = DownloadHelper.Search(str).Result;
@@ -31,7 +30,7 @@ namespace DiscordMusicBot_dotNet.Audio {
                         || audio.Url == string.Empty) {
                         throw new SearchNotFoundException("なかった");
                     }
-                    break;
+                    return audio;
             }
             return null;
         }
