@@ -15,6 +15,8 @@ namespace DiscordMusicBot_dotNet.Core {
         public QueueManager Queue { get; set; }
 
         public int NowQueue { get; set; }
+
+        public bool NextPlay { get; set; }
         
     }
 }

@@ -40,11 +40,14 @@ namespace DiscordMusicBot_dotNet.Services {
             };
             Container.AudioOutStream = Container.AudioClient.CreatePCMStream(AudioApplication.Music, bitrate: 128000);
             Container.QueueManager.AudioPlayer.PlaybackState = Assistor.PlaybackState.Stopped;
+            Container.QueueManager.AudioPlayer.NextPlay = true;
             _connectedChannels.TryAdd(guild.Id, Container);
         }
 
         public async Task LeaveAudio(IGuild guild) {
             if (_connectedChannels.TryRemove(guild.Id, out AudioContainer container)) {
+                container.QueueManager.AudioPlayer.NextPlay = false;
+                container.CancellationTokenSource.Cancel();
                 await container.AudioClient.StopAsync();
             }
         }
@@ -123,9 +126,11 @@ namespace DiscordMusicBot_dotNet.Services {
                     await _discord.SetGameAsync(null);
                     container.CancellationTokenSource = new CancellationTokenSource();
                     container.QueueManager.AudioPlayer.PlaybackState = Assistor.PlaybackState.Stopped;
-                    var next = container.QueueManager.Next();
-                    if (next != null)
-                        SendAudioAsync(guild, channel, next);
+                    if (container.QueueManager.AudioPlayer.NextPlay) {
+                        var next = container.QueueManager.Next();
+                        if (next != null)
+                            SendAudioAsync(guild, channel, next);
+                    }
                 }
             }
         }
