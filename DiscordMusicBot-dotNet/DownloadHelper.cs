@@ -19,19 +19,6 @@ namespace DiscordMusicBot_dotNet {
             return new Audio.Audio { Path = streamUrl, Title = video.Title, Url = video.Url };
         }
 
-        public static async Task<Audio.Audio[]> GetPlayListAudios(string url) {
-            List<Audio.Audio> videolist = new();
-            var youtubeClient = new YoutubeClient();
-            var playlist = await youtubeClient.Playlists.GetAsync(url);
-            await foreach(var video in youtubeClient.Playlists.GetVideosAsync(playlist.Id)) {
-                var videodata = await youtubeClient.Videos.GetAsync(video.Url);
-                var streamManifest = await youtubeClient.Videos.Streams.GetManifestAsync(videodata.Id);
-                var streamUrl = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate().Url;
-                videolist.Add(new Audio.Audio { Path = streamUrl, Title = video.Title, Url = video.Url });
-            }
-            return videolist.ToArray();
-        }
-
         public static async Task<Audio.Audio> Search(string str) {
             var youtubeClient = new YoutubeClient();
             await foreach (var result in youtubeClient.Search.GetVideosAsync(str)) {

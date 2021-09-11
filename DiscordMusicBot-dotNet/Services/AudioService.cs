@@ -10,6 +10,8 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using YoutubeExplode;
+using YoutubeExplode.Videos.Streams;
 
 namespace DiscordMusicBot_dotNet.Services {
     public class AudioService {
@@ -37,6 +39,7 @@ namespace DiscordMusicBot_dotNet.Services {
                 QueueManager = new QueueManager(player),
             };
             Container.AudioOutStream = Container.AudioClient.CreatePCMStream(AudioApplication.Music, bitrate: 128000);
+            Container.QueueManager.AudioPlayer.PlaybackState = Assistor.PlaybackState.Stopped;
             _connectedChannels.TryAdd(guild.Id, Container);
         }
 
@@ -51,46 +54,58 @@ namespace DiscordMusicBot_dotNet.Services {
                 await JoinAudio(guild, target);
             }
 
-            Audio.Audio[] audios;
-
             _connectedChannels.TryGetValue(guild.Id, out AudioContainer container);
-
-            try {
-                audios = container.QueueManager.GetAudioforString(str);
-            } catch (System.Exception) {
-                await channel.SendMessageAsync("なかった");
-                return;
-            }
-
             var play = false;
 
             if (container.QueueManager.GetQueueCount() == 0)
                 play = true;
 
             var description = "";
-            
-            foreach (var music in audios.Select((value, index) => new { value, index })) {
-                container.QueueManager.AddQueue(music.value);
-                var num = music.index + 1;
-                description += num +" : " + music.value.Title+"\n";
-            }
 
-            var embed = new EmbedBuilder();
-            embed.WithTitle("追加");
-            embed.WithColor(Color.Red);
-            embed.WithTimestamp(DateTime.Now);
-            embed.WithDescription(description);
-            await channel.SendMessageAsync(embed: embed.Build());
+            try {
+                var type = DownloadHelper.GetType(str).Result;
+                var embed = new EmbedBuilder();
+                embed.WithTitle("追加");
+                embed.WithColor(Color.Red);
+                embed.WithTimestamp(DateTime.Now);
+                if (type == YoutubeType.Playlist) {
+                    var youtubeClient = new YoutubeClient();
+                    var playlist = await youtubeClient.Playlists.GetAsync(str);
+                    await foreach (var video in youtubeClient.Playlists.GetVideosAsync(playlist.Id).Select((value, index) => new { value, index })) {
+                        var videodata = await youtubeClient.Videos.GetAsync(video.value.Url);
+                        var streamManifest = await youtubeClient.Videos.Streams.GetManifestAsync(videodata.Id);
+                        var streamUrl = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate().Url;
+                        var music = new Audio.Audio { Path = streamUrl, Title = video.value.Title, Url = video.value.Url };
+                        container.QueueManager.AddQueue(music);
+                        if (play) {
+                            SendAudioAsync(guild, channel, container.QueueManager.GetAudio());
+                            play = false;
+                        }
+                        var num = video.index + 1;
+                        description += num + " : " + music.Title + "\n";
+                    }
+                    embed.WithDescription(description);
+                } else {
+                    var audio = container.QueueManager.GetAudioFromString(str,type);
+                    container.QueueManager.AddQueue(audio);
+                    if (play) {
+                        SendAudioAsync(guild, channel, container.QueueManager.GetAudio());
+                        play = false;
+                    }
+                    embed.WithDescription("1 : "+audio);
+                    
+                }
+                await channel.SendMessageAsync(embed: embed.Build());
 
-            if (play) {
-                SendAudioAsync(guild, channel, container.QueueManager.GetAudio());
-                play = false;
+            } catch (System.Exception) {
+                await channel.SendMessageAsync("なかった");
+                return;
             }
         }
 
         public async Task SendAudioAsync(IGuild guild, IMessageChannel channel, Audio.Audio music) {
-            AudioContainer container;
-            if (_connectedChannels.TryGetValue(guild.Id, out container)) {
+            if (_connectedChannels.TryGetValue(guild.Id, out AudioContainer container)) {
+                if (container.QueueManager.AudioPlayer.PlaybackState != Assistor.PlaybackState.Stopped) return;
                 var audioOutStream = container.AudioOutStream;
                 var token = container.CancellationTokenSource.Token;
 
@@ -101,11 +116,13 @@ namespace DiscordMusicBot_dotNet.Services {
 
                 try {
                     container.ResamplerDmoStream = resamplerDmo;
+                    container.QueueManager.AudioPlayer.PlaybackState = Assistor.PlaybackState.Playing;
                     await resamplerDmo.CopyToAsync(audioOutStream, token);
                 } finally {
                     await audioOutStream.FlushAsync();
                     await _discord.SetGameAsync(null);
                     container.CancellationTokenSource = new CancellationTokenSource();
+                    container.QueueManager.AudioPlayer.PlaybackState = Assistor.PlaybackState.Stopped;
                     var next = container.QueueManager.Next();
                     if (next != null)
                         SendAudioAsync(guild, channel, next);
@@ -114,8 +131,7 @@ namespace DiscordMusicBot_dotNet.Services {
         }
 
         public async void SkipAudio(IGuild guild, IMessageChannel channel, IVoiceChannel target) {
-            AudioContainer container;
-            if (_connectedChannels.TryGetValue(guild.Id, out container)) {
+            if (_connectedChannels.TryGetValue(guild.Id, out AudioContainer container)) {
                 container.CancellationTokenSource.Cancel();
                 await channel.SendMessageAsync("スキップしたよ");
             } else {
@@ -129,8 +145,8 @@ namespace DiscordMusicBot_dotNet.Services {
 
         public async void ChangeLoop(IGuild guild, IMessageChannel channel) {
             if (_connectedChannels.TryGetValue(guild.Id, out AudioContainer container)) {
-                var player = container.QueueManager.GetAudioPlayer();
-                player.Loop = player.Loop ? false : true;
+                var player = container.QueueManager.AudioPlayer;
+                player.Loop = !player.Loop;
                 if (player.Loop) {
                     await channel.SendMessageAsync("ループ >> ON");
                 } else {
@@ -141,8 +157,8 @@ namespace DiscordMusicBot_dotNet.Services {
 
         public async void ChangeQueueLoop(IGuild guild, IMessageChannel channel) {
             if (_connectedChannels.TryGetValue(guild.Id, out AudioContainer container)) {
-                var player = container.QueueManager.GetAudioPlayer();
-                player.QueueLoop = player.QueueLoop ? false : true;
+                var player = container.QueueManager.AudioPlayer;
+                player.QueueLoop = !player.QueueLoop;
                 if (player.Loop) {
                     await channel.SendMessageAsync("キューループ >> ON");
                 } else {
@@ -153,8 +169,8 @@ namespace DiscordMusicBot_dotNet.Services {
 
         public async void ChangeShuffle(IGuild guild, IMessageChannel channel) {
             if (_connectedChannels.TryGetValue(guild.Id, out AudioContainer container)) {
-                var player = container.QueueManager.GetAudioPlayer();
-                player.Shuffle = player.Shuffle ? false : true;
+                var player = container.QueueManager.AudioPlayer;
+                player.Shuffle = !player.Shuffle;
                 if (player.Shuffle) {
                     await channel.SendMessageAsync("シャッフル >> ON");
                 } else {

@@ -9,42 +9,31 @@ using System.Threading.Tasks;
 namespace DiscordMusicBot_dotNet.Audio {
     public class QueueManager {
 
-        private AudioPlayer _player;
-
         private List<Audio> _queue = new();
 
+        public AudioPlayer AudioPlayer { get; set; }
+
         public QueueManager(AudioPlayer player) {
-            _player = player;
+            AudioPlayer = player;
         }
 
-        public Audio[] GetAudioforString(string str) {
-            Audio[] audio;
-            switch (DownloadHelper.GetType(str).Result) {
+        public Audio GetAudioFromString(string str, YoutubeType type) {
+            Audio audio;
+            switch (type) {
                 case YoutubeType.Video:
-                    audio = new Audio[1];
-                    audio[0] = DownloadHelper.GetAudio(str).Result;
-                    break;
-
-                case YoutubeType.Playlist:
-                    audio = DownloadHelper.GetPlayListAudios(str).Result;
+                    audio = DownloadHelper.GetAudio(str).Result;
                     break;
 
                 case YoutubeType.Search:
-                    audio = new Audio[1];
-                    audio[0] = DownloadHelper.Search(str).Result;
-                    if (audio[0].Path == string.Empty
-                        || audio[0].Title == string.Empty
-                        || audio[0].Url == string.Empty) {
+                    audio = DownloadHelper.Search(str).Result;
+                    if (audio.Path == string.Empty
+                        || audio.Title == string.Empty
+                        || audio.Url == string.Empty) {
                         throw new SearchNotFoundException("なかった");
                     }
                     break;
-
-                default:
-                    audio = null;
-                    break;
             }
-            
-            return audio;
+            return null;
         }
 
 
@@ -57,11 +46,7 @@ namespace DiscordMusicBot_dotNet.Audio {
         }
 
         public Audio GetAudio() {
-            return _queue[_player.NowQueue];
-        }
-
-        public AudioPlayer GetAudioPlayer() {
-            return _player;
+            return _queue[AudioPlayer.NowQueue];
         }
 
         public int GetQueueCount() {
@@ -86,16 +71,16 @@ namespace DiscordMusicBot_dotNet.Audio {
         }
 
         public Audio Next() {
-            if (_player.QueueLoop) {
-                if (_queue.Count >= _player.NowQueue) {
-                    _player.NowQueue += 1;
-                    return _queue[_player.NowQueue];
+            if (AudioPlayer.QueueLoop) {
+                if (_queue.Count >= AudioPlayer.NowQueue) {
+                    AudioPlayer.NowQueue += 1;
+                    return _queue[AudioPlayer.NowQueue];
                 } else {
-                    _player.NowQueue = 0;
-                    return _queue[_player.NowQueue];
+                    AudioPlayer.NowQueue = 0;
+                    return _queue[AudioPlayer.NowQueue];
                 }
             }
-            if (!_player.Loop) {
+            if (!AudioPlayer.Loop) {
                 RemoveQueue(0);
             }
             if (_queue.Count == 0) return null;
@@ -106,7 +91,7 @@ namespace DiscordMusicBot_dotNet.Audio {
         public int GetRandomIndex() {
             while (true) {
                 var rand = new Random().Next(0, _queue.Count);
-                if (rand != _player.NowQueue) {
+                if (rand != AudioPlayer.NowQueue) {
                     return rand;
                 }
             }
@@ -114,9 +99,9 @@ namespace DiscordMusicBot_dotNet.Audio {
 
         public void Reset() {
             _queue = new();
-            _player.NowQueue = 0;
-            _player.Loop = false;
-            _player.Shuffle = false;
+            AudioPlayer.NowQueue = 0;
+            AudioPlayer.Loop = false;
+            AudioPlayer.Shuffle = false;
         }
     }
 }
