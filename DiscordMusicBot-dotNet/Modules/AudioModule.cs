@@ -65,7 +65,6 @@ namespace DiscordMusicBot_dotNet.Command {
                     url += word + " ";
             }
 
-            await ReplyAsync("Debug >> "+ Uri.IsWellFormedUriString(str[0], UriKind.Absolute).ToString());
             await ReplyAsync("ロード中...");
             await _service.AddQueue(Context.Guild, Context.Channel, (Context.User as IVoiceState).VoiceChannel, url);
         }
@@ -76,12 +75,6 @@ namespace DiscordMusicBot_dotNet.Command {
             _service.SkipAudio(Context.Guild, Context.Channel, (Context.User as IVoiceState).VoiceChannel);
             return Task.CompletedTask;
         }
-
-        /*[Command("stop", RunMode = RunMode.Async)]
-        public Task Stop() {
-            _service.StopAudio(Context.Guild, Context.Channel);
-            return Task.CompletedTask;
-        }*/
 
         [Command("search", RunMode = RunMode.Async)]
         public async Task Search(params string[] url) {

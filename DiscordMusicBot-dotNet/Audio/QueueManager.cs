@@ -55,6 +55,11 @@ namespace DiscordMusicBot_dotNet.Audio {
         public bool IsQueueinMusic() {
             return _queue.Count != 0;
         }
+        
+        public string GetNowPlayingMusicTitle() {
+            if (_queue.Count == 0) return null;
+            return _queue[0].Title;
+        }
 
         public string[] GetQueueMusicTitles() {
             if (_queue.Count == 0) return null;

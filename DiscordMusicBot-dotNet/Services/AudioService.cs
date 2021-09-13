@@ -152,7 +152,6 @@ namespace DiscordMusicBot_dotNet.Services {
             if (_connectedChannels.TryGetValue(guild.Id, out AudioContainer container)) {
                 container.QueueManager.AudioPlayer.NextPlay = false;
                 container.CancellationTokenSource.Cancel();
-                await container.AudioClient.StopAsync();
 
                 container.QueueManager.AudioPlayer.NextPlay = true;
                 container.QueueManager.Reset();
@@ -199,12 +198,14 @@ namespace DiscordMusicBot_dotNet.Services {
         public async Task GetQueueList(IGuild guild, IMessageChannel channel,int num) {
             if (_connectedChannels.TryGetValue(guild.Id, out AudioContainer container)) {
                 var titles = container.QueueManager.GetQueueMusicTitles();
-                if (titles == null) {
+                var playing = container.QueueManager.GetNowPlayingMusicTitle();
+                if (titles == null || playing == null) {
                     await channel.SendMessageAsync("何も再生してないよ");
                     return;
                 }
                 var maxpage = Math.Ceiling(titles.Length / 10.0);
                 var description = "ページ "+ num +"/" + maxpage+"\n\n";
+                description += "*現在再生中 : " + playing + "\n\n";
                 for (int i = 0 + 10 * (num - 1); i < 10 + 10 * (num - 1); i++) {
                     if (titles.Length == i) break;
                     var number = i + 1;
