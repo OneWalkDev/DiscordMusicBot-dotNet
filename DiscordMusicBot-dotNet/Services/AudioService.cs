@@ -7,6 +7,7 @@ using DiscordMusicBot_dotNet.Core;
 using NAudio.Wave;
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -107,12 +108,9 @@ namespace DiscordMusicBot_dotNet.Services {
             if (_connectedChannels.TryGetValue(guild.Id, out AudioContainer container)) {
                 var audioOutStream = container.AudioOutStream;
                 var token = container.CancellationTokenSource.Token;
-
                 var format = new WaveFormat(48000, 16, 2);
                 using var reader = new MediaFoundationReader(music.Path);
-                await _discord.SetGameAsync("再生中 : " + music.Title);
                 using var resamplerDmo = new ResamplerDmoStream(reader, format);
-
                 try {
                     container.ResamplerDmoStream = resamplerDmo;
                     container.QueueManager.AudioPlayer.PlaybackState = Assistor.PlaybackState.Playing;
@@ -122,11 +120,9 @@ namespace DiscordMusicBot_dotNet.Services {
                     await audioOutStream.FlushAsync();
                     await _discord.SetGameAsync(null);
                     container.CancellationTokenSource = new CancellationTokenSource();
-                   
                     if (container.QueueManager.AudioPlayer.NextPlay) {
                         var next = container.QueueManager.Next();
                         if (next != null) {
-                            await Task.Delay(2000);
                             SendAudioAsync(guild, channel, next);
                         }
                     }
