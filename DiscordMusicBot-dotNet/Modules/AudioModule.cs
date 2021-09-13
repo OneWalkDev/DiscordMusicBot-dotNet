@@ -58,11 +58,16 @@ namespace DiscordMusicBot_dotNet.Command {
                 return;
             }
 
-            foreach(var word in str) 
-                url += word + " ";
+            if(Uri.IsWellFormedUriString(str[0], UriKind.Absolute)) {
+                url = str[0];
+            } else {
+                foreach (var word in str) 
+                    url += word + " ";
+            }
 
+            await ReplyAsync("Debug >> "+ Uri.IsWellFormedUriString(str[0], UriKind.Absolute).ToString());
             await ReplyAsync("ロード中...");
-            await _service.AddQueue(Context.Guild, Context.Channel, (Context.User as IVoiceState).VoiceChannel, str[0]);
+            await _service.AddQueue(Context.Guild, Context.Channel, (Context.User as IVoiceState).VoiceChannel, url);
         }
 
         [Command("skip", RunMode = RunMode.Async)]
