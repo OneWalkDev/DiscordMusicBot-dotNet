@@ -8,8 +8,8 @@ using YoutubeExplode.Common;
 using YoutubeExplode.Converter;
 using YoutubeExplode.Videos.Streams;
 
-namespace DiscordMusicBot_dotNet {
-    class DownloadHelper {
+namespace DiscordMusicBot_dotNet.Core {
+    class StreamHelper {
 
         public static async Task<Audio.Audio> GetAudio(string url) {
             var youtubeClient = new YoutubeClient();
@@ -29,15 +29,10 @@ namespace DiscordMusicBot_dotNet {
             return new Audio.Audio { Path = String.Empty, Title = String.Empty, Url = String.Empty };
         }
 
-        public static string GetPath(string id) {
-            var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\yurisi\DiscordMusicBot\cache\";
-            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-            return path + id + ".mp3";
-        }
-
-        public static async Task Download(string url, string path) {
+        public static async Task<string> getHighestBitrateUrl(YoutubeExplode.Videos.VideoId id) {
             var youtubeClient = new YoutubeClient();
-            await youtubeClient.Videos.DownloadAsync(url, path);
+            var streamManifest = await youtubeClient.Videos.Streams.GetManifestAsync(id);
+            return streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate().Url;
         }
 
         public static async Task<YoutubeType> GetType(string url) {

@@ -11,7 +11,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using YoutubeExplode;
-using YoutubeExplode.Videos.Streams;
 
 namespace DiscordMusicBot_dotNet.Services {
     public class AudioService {
@@ -64,7 +63,7 @@ namespace DiscordMusicBot_dotNet.Services {
             if (container.QueueManager.GetQueueCount() == 0)
                 play = true;
 
-            var type = DownloadHelper.GetType(str).Result;
+            var type = StreamHelper.GetType(str).Result;
             var embed = new EmbedBuilder();
             embed.WithTitle("追加");
             embed.WithColor(Color.Red);
@@ -72,12 +71,10 @@ namespace DiscordMusicBot_dotNet.Services {
             Audio.Audio music;
             if (type == YoutubeType.Playlist) {
                 var youtubeClient = new YoutubeClient();
-                var playlist = await youtubeClient.Playlists.GetAsync(str);
-                await foreach (var video in youtubeClient.Playlists.GetVideosAsync(playlist.Id).Select((value, index) => new { value, index })) {
-                    var videodata = await youtubeClient.Videos.GetAsync(video.value.Url);
-                    var streamManifest = await youtubeClient.Videos.Streams.GetManifestAsync(videodata.Id);
-                    var streamUrl = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate().Url;
-                    music = new Audio.Audio { Path = streamUrl, Title = video.value.Title, Url = video.value.Url };
+                var playlists = youtubeClient.Playlists;
+                var playlist = await playlists.GetAsync(str);
+                await foreach (var video in playlists.GetVideosAsync(playlist.Id).Select((value, index) => new { value, index })) {
+                    music = new Audio.Audio { Path = StreamHelper.getHighestBitrateUrl(video.value.Id).Result, Title = video.value.Title, Url = video.value.Url };
                     container.QueueManager.AddQueue(music);
                     if (play) {
                         SendAudioAsync(guild, channel, music);
@@ -108,8 +105,6 @@ namespace DiscordMusicBot_dotNet.Services {
 
         public async Task SendAudioAsync(IGuild guild, IMessageChannel channel, Audio.Audio music) {
             if (_connectedChannels.TryGetValue(guild.Id, out AudioContainer container)) {
-                if (container.QueueManager.AudioPlayer.PlaybackState != Assistor.PlaybackState.Stopped) 
-                    await Task.Delay(2000);
                 var audioOutStream = container.AudioOutStream;
                 var token = container.CancellationTokenSource.Token;
 
@@ -123,11 +118,11 @@ namespace DiscordMusicBot_dotNet.Services {
                     container.QueueManager.AudioPlayer.PlaybackState = Assistor.PlaybackState.Playing;
                     await resamplerDmo.CopyToAsync(audioOutStream, token);
                 } finally {
+                    container.QueueManager.AudioPlayer.PlaybackState = Assistor.PlaybackState.Stopped;
                     await audioOutStream.FlushAsync();
                     await _discord.SetGameAsync(null);
                     container.CancellationTokenSource = new CancellationTokenSource();
-                    container.QueueManager.AudioPlayer.PlaybackState = Assistor.PlaybackState.Stopped;
-
+                   
                     if (container.QueueManager.AudioPlayer.NextPlay) {
                         var next = container.QueueManager.Next();
                         if (next != null) {
@@ -141,11 +136,15 @@ namespace DiscordMusicBot_dotNet.Services {
 
         public async void SkipAudio(IGuild guild, IMessageChannel channel, IVoiceChannel target) {
             if (_connectedChannels.TryGetValue(guild.Id, out AudioContainer container)) {
-                container.CancellationTokenSource.Cancel();
-                await channel.SendMessageAsync("スキップしたよ");
-            } else {
-                await channel.SendMessageAsync("いまいない");
+                if (container.QueueManager.AudioPlayer.PlaybackState != Assistor.PlaybackState.Stopped) {
+                    container.CancellationTokenSource.Cancel();
+                    await channel.SendMessageAsync("スキップしたよ");
+                    return;
+                }
+                await channel.SendMessageAsync("はやい");
+                return;
             }
+            await channel.SendMessageAsync("いまいない");
         }
 
         public async void ResetAudio(IGuild guild, IMessageChannel channel) {

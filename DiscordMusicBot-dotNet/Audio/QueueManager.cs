@@ -4,7 +4,6 @@ using DiscordMusicBot_dotNet.Exception;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace DiscordMusicBot_dotNet.Audio {
     public class QueueManager {
@@ -21,10 +20,10 @@ namespace DiscordMusicBot_dotNet.Audio {
             Audio audio;
             switch (type) {
                 case YoutubeType.Video:
-                    return DownloadHelper.GetAudio(str).Result;
+                    return StreamHelper.GetAudio(str).Result;
 
                 case YoutubeType.Search:
-                    audio = DownloadHelper.Search(str).Result;
+                    audio = StreamHelper.Search(str).Result;
                     if (audio.Path == string.Empty
                         || audio.Title == string.Empty
                         || audio.Url == string.Empty) {
