@@ -26,7 +26,6 @@ namespace DiscordMusicBot_dotNet.Command {
                 "leave : botが退出\n" +
                 "play [YoutubeURL,検索したいワード] : 曲をキューに追加\n" +
                 "skip : 曲をスキップ\n" +
-                "stop : 曲をストップ\n" +
                 "search : 動画をyoutubeから探す\n" +
                 "loop : 1曲ループする\n" +
                 "qloop : キュー内をループする\n" +
