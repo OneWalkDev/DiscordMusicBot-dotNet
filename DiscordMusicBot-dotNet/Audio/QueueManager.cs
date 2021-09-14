@@ -54,7 +54,7 @@ namespace DiscordMusicBot_dotNet.Audio {
         public bool IsQueueinMusic() {
             return _queue.Count != 0;
         }
-        
+
         public string GetNowPlayingMusicTitle() {
             if (_queue.Count == 0) return null;
             return _queue[0].Title;
@@ -83,11 +83,21 @@ namespace DiscordMusicBot_dotNet.Audio {
                     return _queue[AudioPlayer.NowQueue];
                 }
             }
+            if (AudioPlayer.Shuffle) {
+                //TODO
+            }
             if (!AudioPlayer.Loop) {
                 RemoveQueue(0);
             }
             if (_queue.Count == 0) return null;
             return _queue[0];
+        }
+
+        public void LoopDisable() {
+            for (var i = 0; i <= AudioPlayer.NowQueue; i++) {
+                RemoveQueue(0);
+            }
+            AudioPlayer.NowQueue = 0;
         }
 
 

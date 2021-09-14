@@ -174,6 +174,7 @@ namespace DiscordMusicBot_dotNet.Services {
                     await channel.SendMessageAsync("キューループ >> ON");
                 } else {
                     await channel.SendMessageAsync("キューループ >> OFF");
+                    container.QueueManager.LoopDisable();
                 }
             }
         }
@@ -186,6 +187,7 @@ namespace DiscordMusicBot_dotNet.Services {
                     await channel.SendMessageAsync("シャッフル >> ON");
                 } else {
                     await channel.SendMessageAsync("シャッフル >> OFF");
+                    container.QueueManager.LoopDisable();
                 }
             }
         }
