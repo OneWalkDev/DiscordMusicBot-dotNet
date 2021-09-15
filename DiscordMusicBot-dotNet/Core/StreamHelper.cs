@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using YoutubeExplode;
 using YoutubeExplode.Common;
 using YoutubeExplode.Converter;
+using YoutubeExplode.Playlists;
 using YoutubeExplode.Videos.Streams;
 
 namespace DiscordMusicBot_dotNet.Core {
@@ -55,5 +56,15 @@ namespace DiscordMusicBot_dotNet.Core {
             }
             return value;
         }
+
+        public static PlaylistClient GetPlaylistClient() {
+            return new YoutubeClient().Playlists;
+        }
+
+        public static async Task<Playlist> GetPlaylists(string url) {
+            var youtubeClient = new YoutubeClient();
+            return await youtubeClient.Playlists.GetAsync(url);
+        }
+
     }
 }

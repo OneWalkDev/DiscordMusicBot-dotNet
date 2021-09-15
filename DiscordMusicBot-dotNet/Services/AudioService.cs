@@ -71,10 +71,8 @@ namespace DiscordMusicBot_dotNet.Services {
             embed.WithTimestamp(DateTime.Now);
             Audio.Audio music;
             if (type == YoutubeType.Playlist) {
-                var youtubeClient = new YoutubeClient();
-                var playlists = youtubeClient.Playlists;
-                var playlist = await playlists.GetAsync(str);
-                await foreach (var video in playlists.GetVideosAsync(playlist.Id).Select((value, index) => new { value, index })) {
+                var playlist = StreamHelper.GetPlaylists(str).Result;
+                await foreach (var video in StreamHelper.GetPlaylistClient().GetVideosAsync(playlist.Id).Select((value, index) => new { value, index })) {
                     music = new Audio.Audio { Path = StreamHelper.getHighestBitrateUrl(video.value.Id).Result, Title = video.value.Title, Url = video.value.Url };
                     container.QueueManager.AddQueue(music);
                     if (play) {
