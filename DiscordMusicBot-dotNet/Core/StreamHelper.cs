@@ -1,11 +1,8 @@
 ﻿using DiscordMusicBot_dotNet.Assistor;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using YoutubeExplode;
 using YoutubeExplode.Common;
-using YoutubeExplode.Converter;
 using YoutubeExplode.Playlists;
 using YoutubeExplode.Videos.Streams;
 

@@ -7,11 +7,9 @@ using DiscordMusicBot_dotNet.Core;
 using NAudio.Wave;
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using YoutubeExplode;
 
 namespace DiscordMusicBot_dotNet.Services {
     public class AudioService {
