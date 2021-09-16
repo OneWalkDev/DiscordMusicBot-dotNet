@@ -37,14 +37,12 @@ namespace DiscordMusicBot_dotNet.Command {
         [Command("join", RunMode = RunMode.Async)]
         [Alias("j")]
         public async Task Join() {
-            var user = Context.User as IGuildUser;
             await _service.JoinAudio(Context.Guild, (Context.User as IVoiceState).VoiceChannel);
         }
 
         [Command("Leave", RunMode = RunMode.Async)]
         [Alias("l")]
         public async Task Leave() {
-            var user = Context.User as IGuildUser;
             await _service.LeaveAudio(Context.Guild);
         }
 
@@ -101,25 +99,25 @@ namespace DiscordMusicBot_dotNet.Command {
         }
 
         [Command("loop", RunMode = RunMode.Async)]
-        public Task Loop(params string[] url) {
+        public Task Loop() {
             _service.ChangeLoop(Context.Guild, Context.Channel);
             return Task.CompletedTask;
         }
 
         [Command("qloop", RunMode = RunMode.Async)]
-        public Task QLoop(params string[] url) {
+        public Task QLoop() {
             _service.ChangeQueueLoop(Context.Guild, Context.Channel);
             return Task.CompletedTask;
         }
 
         [Command("shuffle", RunMode = RunMode.Async)]
-        public Task Shuffle(params string[] url) {
+        public Task Shuffle() {
             _service.ChangeShuffle(Context.Guild, Context.Channel);
             return Task.CompletedTask;
         }
 
         [Command("Reset", RunMode = RunMode.Async)]
-        public Task Reset(params string[] url) {
+        public Task Reset() {
             _service.ResetAudio(Context.Guild, Context.Channel);
             return Task.CompletedTask;
         }
