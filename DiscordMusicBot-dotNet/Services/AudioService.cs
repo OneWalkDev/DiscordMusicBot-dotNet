@@ -23,12 +23,9 @@ namespace DiscordMusicBot_dotNet.Services {
         }
 
         public async Task JoinAudio(IGuild guild, IVoiceChannel target) {
-            if (_connectedChannels.TryGetValue(guild.Id, out _)) {
-                return;
-            }
-            if (target.Guild.Id != guild.Id) {
-                return;
-            }
+            if (_connectedChannels.TryGetValue(guild.Id, out _)) return;
+            if (target.Guild.Id != guild.Id) return;
+            
 
             var player = new AudioPlayer();
             var Container = new AudioContainer {
@@ -51,9 +48,8 @@ namespace DiscordMusicBot_dotNet.Services {
         }
 
         public async Task AddQueue(IGuild guild, IMessageChannel channel, IVoiceChannel target, string str) {
-            if (!_connectedChannels.TryGetValue(guild.Id, out _)) {
-                await JoinAudio(guild, target);
-            }
+            if (!_connectedChannels.TryGetValue(guild.Id, out _)) await JoinAudio(guild, target);
+
 
             _connectedChannels.TryGetValue(guild.Id, out AudioContainer container);
 
@@ -82,9 +78,8 @@ namespace DiscordMusicBot_dotNet.Services {
                 }
                 embed.WithDescription(description);
             } else {
-                try {
-                    music = container.QueueManager.GetAudioFromString(str, type);
-                } catch (System.Exception) {
+                music = container.QueueManager.GetAudioFromString(str, type);
+                if (music.Title == null || music.Path == null || music.Url == null) {
                     await channel.SendMessageAsync("なかった");
                     return;
                 }

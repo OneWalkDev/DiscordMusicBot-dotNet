@@ -17,21 +17,11 @@ namespace DiscordMusicBot_dotNet.Audio {
         }
 
         public Audio GetAudioFromString(string str, YoutubeType type) {
-            Audio audio;
-            switch (type) {
-                case YoutubeType.Video:
-                    return StreamHelper.GetAudio(str).Result;
-
-                case YoutubeType.Search:
-                    audio = StreamHelper.Search(str).Result;
-                    if (audio.Path == string.Empty
-                        || audio.Title == string.Empty
-                        || audio.Url == string.Empty) {
-                        throw new SearchNotFoundException("なかった");
-                    }
-                    return audio;
-            }
-            return null;
+            return type switch {
+                YoutubeType.Video => StreamHelper.GetAudio(str).Result,
+                YoutubeType.Search => StreamHelper.Search(str).Result,
+                _ => null
+            };
         }
 
 
