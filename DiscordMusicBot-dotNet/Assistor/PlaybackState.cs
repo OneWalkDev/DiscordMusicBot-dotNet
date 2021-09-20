@@ -1,4 +1,5 @@
 ﻿namespace DiscordMusicBot_dotNet.Assistor {
+
     /// <summary>
     /// playback state
     /// </summary>
