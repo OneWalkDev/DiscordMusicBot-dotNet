@@ -22,14 +22,15 @@ namespace DiscordMusicBot_dotNet.Command {
             embed.WithTimestamp(DateTime.Now);
             embed.WithDescription("エイリアスは*です\n" +
                 "help : ヘルプを表示\n" +
-                "join : botを入室\n" +
-                "leave : botが退出\n" +
-                "play [YoutubeURL,検索したいワード] : 曲をキューに追加\n" +
-                "skip : 曲をスキップ\n" +
+                "join(j) : botを入室\n" +
+                "leave(l) : botが退出\n" +
+                "play(p) [YoutubeURL,検索したいワード] : 曲をキューに追加\n" +
+                "skip(s) : 曲をスキップ\n" +
                 "search : 動画をyoutubeから探す\n" +
                 "loop : 1曲ループする\n" +
                 "qloop : キュー内をループする\n" +
                 "shuffle : ループしシャッフル再生する\n" +
+                "quere(q) : キューの中に入ってる曲を表示\n"+
                 "\ngithub : https://github.com/yurisi0212/DiscordMusicBot-dotNet");
             await Context.Channel.SendMessageAsync(embed: embed.Build());
         }
