@@ -80,7 +80,7 @@ namespace DiscordMusicBot_dotNet.Services {
             } else {
                 music = container.QueueManager.GetAudioFromString(str, type);
                 if (music.Title == null || music.Path == null || music.Url == null) {
-                    await channel.SendMessageAsync("なかった");
+                    await channel.SendMessageAsync("結果が見つかりませんでした。");
                     return;
                 }
 
@@ -125,13 +125,13 @@ namespace DiscordMusicBot_dotNet.Services {
             if (_connectedChannels.TryGetValue(guild.Id, out AudioContainer container)) {
                 if (container.QueueManager.AudioPlayer.PlaybackState != Assistor.PlaybackState.Stopped) {
                     container.CancellationTokenSource.Cancel();
-                    await channel.SendMessageAsync("スキップしたよ");
+                    await channel.SendMessageAsync("曲をスキップしました。");
                     return;
                 }
-                await channel.SendMessageAsync("はやい");
+                await channel.SendMessageAsync("現在読込中です。");
                 return;
             }
-            await channel.SendMessageAsync("いまいない");
+            await channel.SendMessageAsync("音楽を再生する場合は*joinでbotを参加させてください。");
         }
 
         public async void ResetAudio(IGuild guild, IMessageChannel channel) {
@@ -141,7 +141,7 @@ namespace DiscordMusicBot_dotNet.Services {
 
                 container.QueueManager.AudioPlayer.NextPlay = true;
                 container.QueueManager.Reset();
-                await channel.SendMessageAsync("キューをリセットしたよ");
+                await channel.SendMessageAsync("キューをリセットしました");
             }
         }
 
@@ -149,11 +149,7 @@ namespace DiscordMusicBot_dotNet.Services {
             if (_connectedChannels.TryGetValue(guild.Id, out AudioContainer container)) {
                 var player = container.QueueManager.AudioPlayer;
                 player.Loop = !player.Loop;
-                if (player.Loop) {
-                    await channel.SendMessageAsync("ループ >> ON");
-                } else {
-                    await channel.SendMessageAsync("ループ >> OFF");
-                }
+                await channel.SendMessageAsync("ループ >> "+ (player.Loop ? "ON" : "OFF"));
             }
         }
 
@@ -161,7 +157,7 @@ namespace DiscordMusicBot_dotNet.Services {
             if (_connectedChannels.TryGetValue(guild.Id, out AudioContainer container)) {
                 var player = container.QueueManager.AudioPlayer;
                 player.QueueLoop = !player.QueueLoop;
-                if (player.Loop) {
+                if (player.QueueLoop) {
                     await channel.SendMessageAsync("キューループ >> ON");
                 } else {
                     await channel.SendMessageAsync("キューループ >> OFF");
@@ -188,7 +184,7 @@ namespace DiscordMusicBot_dotNet.Services {
                 var titles = container.QueueManager.GetQueueMusicTitles();
                 var playing = container.QueueManager.GetNowPlayingMusicTitle();
                 if (titles == null || playing == null) {
-                    await channel.SendMessageAsync("何も再生してないよ");
+                    await channel.SendMessageAsync("現在何も再生されていません。");
                     return;
                 }
                 var maxpage = Math.Ceiling(titles.Length / 10.0);

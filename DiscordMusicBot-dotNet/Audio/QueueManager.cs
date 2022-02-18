@@ -73,12 +73,15 @@ namespace DiscordMusicBot_dotNet.Audio {
                     return _queue[AudioPlayer.NowQueue];
                 }
             }
+
             if (AudioPlayer.Shuffle) {
                 //TODO
             }
+
             if (!AudioPlayer.Loop) {
                 RemoveQueue(0);
             }
+
             if (_queue.Count == 0) return null;
             return _queue[0];
         }
