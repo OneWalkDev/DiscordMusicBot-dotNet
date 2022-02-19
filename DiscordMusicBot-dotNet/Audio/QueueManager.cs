@@ -47,7 +47,7 @@ namespace DiscordMusicBot_dotNet.Audio {
 
         public string GetNowPlayingMusicTitle() {
             if (_queue.Count == 0) return null;
-            return _queue[0].Title;
+            return _queue[AudioPlayer.NowQueue].Title;
         }
 
         public string[] GetQueueMusicTitles() {
@@ -86,7 +86,7 @@ namespace DiscordMusicBot_dotNet.Audio {
         }
 
         public void LoopDisable() {
-            for (var i = 0; i <= AudioPlayer.NowQueue; i++) {
+            for (var i = 0; i < AudioPlayer.NowQueue; i++) {
                 RemoveQueue(0);
             }
             AudioPlayer.NowQueue = 0;

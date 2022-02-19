@@ -98,17 +98,23 @@ namespace DiscordMusicBot_dotNet.Services {
 
         public async Task SendAudioAsync(IGuild guild, IMessageChannel channel, Audio.Audio music) {
             if (_connectedChannels.TryGetValue(guild.Id, out AudioContainer container)) {
+                Debug.Print("a");
                 var audioOutStream = container.AudioOutStream;
                 var token = container.CancellationTokenSource.Token;
                 var format = new WaveFormat(48000, 16, 2);
                 using var reader = new MediaFoundationReader(music.Path);
                 using var resamplerDmo = new ResamplerDmoStream(reader, format);
+                Debug.Print("b");
                 try {
                     container.ResamplerDmoStream = resamplerDmo;
+                    Debug.Print("c");
                     container.QueueManager.AudioPlayer.PlaybackState = Assistor.PlaybackState.Playing;
+                    Debug.Print("d");
                     await resamplerDmo.CopyToAsync(audioOutStream, token);
+                    Debug.Print("e");
                 } finally {
                     container.QueueManager.AudioPlayer.PlaybackState = Assistor.PlaybackState.Stopped;
+                    Debug.Print("f");
                     await audioOutStream.FlushAsync();
                     await _discord.SetGameAsync(null);
                     container.CancellationTokenSource = new CancellationTokenSource();
@@ -116,6 +122,7 @@ namespace DiscordMusicBot_dotNet.Services {
                         var next = container.QueueManager.Next();
                         if (next != null) {
                             SendAudioAsync(guild, channel, next);
+                            Debug.Print("g");
                         }
                     }
                 }
