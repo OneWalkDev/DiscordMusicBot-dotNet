@@ -108,5 +108,9 @@ namespace DiscordMusicBot_dotNet.Audio {
             AudioPlayer.Loop = false;
             AudioPlayer.Shuffle = false;
         }
+
+        public void Delete(int num) {
+
+        }
     }
 }

@@ -68,6 +68,22 @@ namespace DiscordMusicBot_dotNet.Command {
             await _service.AddQueue(Context.Guild, Context.Channel, (Context.User as IVoiceState).VoiceChannel, url);
         }
 
+        [Command("delete", RunMode = RunMode.Async)]
+        [Alias("d")]
+
+        public async Task Delete(params string[] str) {
+            var num = 1;
+            if (str.Length != 1) {
+                await ReplyAsync("曲番号を指定してください。");
+                return;
+            }
+
+            if (int.TryParse(str[0], out num)) {
+
+            }
+
+        }
+
         [Command("skip", RunMode = RunMode.Async)]
         [Alias("s")]
         public Task Skip() {
@@ -78,7 +94,7 @@ namespace DiscordMusicBot_dotNet.Command {
         [Command("search", RunMode = RunMode.Async)]
         public async Task Search(params string[] url) {
             if (url.Length == 0) {
-                await ReplyAsync("むり");
+                await ReplyAsync("現在非対応です");
                 return;
             }
             //Todo
@@ -118,7 +134,7 @@ namespace DiscordMusicBot_dotNet.Command {
             return Task.CompletedTask;
         }
 
-        [Command("Reset", RunMode = RunMode.Async)]
+        [Command("reset", RunMode = RunMode.Async)]
         public Task Reset() {
             _service.ResetAudio(Context.Guild, Context.Channel);
             return Task.CompletedTask;

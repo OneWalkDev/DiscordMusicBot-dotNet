@@ -122,6 +122,12 @@ namespace DiscordMusicBot_dotNet.Services {
             }
         }
 
+        public async void DeleteAudio(IGuild guild, int num) {
+            if (_connectedChannels.TryGetValue(guild.Id, out AudioContainer container)) {
+                container.QueueManager.Delete(num);
+            }
+        }
+
         public async void SkipAudio(IGuild guild, IMessageChannel channel, IVoiceChannel target) {
             if (_connectedChannels.TryGetValue(guild.Id, out AudioContainer container)) {
                 if (container.QueueManager.AudioPlayer.PlaybackState != Assistor.PlaybackState.Stopped) {
