@@ -13,6 +13,10 @@ Discordでダウンロードせずyoutubeの音楽を流すbotです。
 
 ## 使い方 
 
+https://github.com/yurisi0212/DiscordMusicBot-dotNet/releases
+
+ブランチ等分けてませんのでリリースから最新バージョンをダウンロードしてください。
+
 TokenManagerのDiscordTokenにトークンを入力すれば使えます。  
 
 ビルドはx64でしてください。
