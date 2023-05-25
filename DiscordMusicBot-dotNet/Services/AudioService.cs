@@ -26,17 +26,22 @@ namespace DiscordMusicBot_dotNet.Services {
         public async Task JoinAudio(IGuild guild, IVoiceChannel target) {
             if (_connectedChannels.TryGetValue(guild.Id, out _)) return;
             if (target.Guild.Id != guild.Id) return;
-            
 
             var player = new AudioPlayer();
+            var test1 = await target.ConnectAsync();
+            
             var Container = new AudioContainer {
-                AudioClient = await target.ConnectAsync(),
+                AudioClient = test1,
                 CancellationTokenSource = new CancellationTokenSource(),
                 QueueManager = new QueueManager(player),
             };
-            Container.AudioOutStream = Container.AudioClient.CreatePCMStream(AudioApplication.Music, bitrate: 128000);
+
+           
+            Container.AudioOutStream = Container.AudioClient.CreatePCMStream(AudioApplication.Music);
+
             Container.QueueManager.AudioPlayer.PlaybackState = Assistor.PlaybackState.Stopped;
             Container.QueueManager.AudioPlayer.NextPlay = true;
+   
             _connectedChannels.TryAdd(guild.Id, Container);
         }
 
@@ -50,10 +55,7 @@ namespace DiscordMusicBot_dotNet.Services {
 
         public async Task AddQueue(IGuild guild, IMessageChannel channel, IVoiceChannel target, string str) {
             if (!_connectedChannels.TryGetValue(guild.Id, out _)) await JoinAudio(guild, target);
-
-
             _connectedChannels.TryGetValue(guild.Id, out AudioContainer container);
-
             var description = "";
             var play = false;
             if (container.QueueManager.GetQueueCount() == 0)

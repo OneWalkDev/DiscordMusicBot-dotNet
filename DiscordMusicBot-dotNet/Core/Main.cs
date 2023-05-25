@@ -15,8 +15,11 @@ namespace DiscordMusicBot_dotNet.Core {
         private TokenManager _token;
 
         public async Task MainAsync() {
+            var config = new DiscordSocketConfig {
+                GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent
+            };
             _services = ConfigureServices();
-            _client = _services.GetRequiredService<DiscordSocketClient>();
+            _client = new DiscordSocketClient(config);
             _client.Log += Log;
             _services.GetRequiredService<CommandService>().Log += Log;
             _commands = new CommandService();
@@ -37,7 +40,7 @@ namespace DiscordMusicBot_dotNet.Core {
             var argPos = 0;
             var context = new SocketCommandContext(_client, message);
 
-            if (message.HasCharPrefix('*', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos)) {
+            if (message.HasCharPrefix('?', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos)) {
                 var result = await _commands.ExecuteAsync(context, argPos, _services);
 
                 if (!result.IsSuccess) {
