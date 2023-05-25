@@ -4,8 +4,6 @@ using DiscordMusicBot_dotNet.Services;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordMusicBot_dotNet.Commands {
@@ -14,14 +12,39 @@ namespace DiscordMusicBot_dotNet.Commands {
         private static readonly Dictionary<string, BaseSlashCommand> SlashCommands = new();
         private static AudioService _service;
 
-        public static async Task RegisterSlashCommandAsync(DiscordSocketClient client, AudioService service) {
-            ulong guildId = 980903882437836860;
-
+        public async static Task RegisterSlashCommand(DiscordSocketClient client, AudioService service) {
             _service = service;
-
             try {
-                await CreateGuildCommand<HelpSlashCommand>(client, guildId);
-                await CreateGuildCommand<JoinSlashCommand>(client, guildId);
+                if (Settings.Global) {
+                    _ = CreateGrobalCommand<HelpSlashCommand>(client);
+                    _ = CreateGrobalCommand<JoinSlashCommand>(client);
+                    _ = CreateGrobalCommand<LeaveSlashCommand>(client);
+                    _ = CreateGrobalCommand<PlaySlashCommand>(client);
+                    _ = CreateGrobalCommand<SkipSlashCommand>(client);
+                    _ = CreateGrobalCommand<QueueSlashCommand>(client);
+                    _ = CreateGrobalCommand<LoopSlashCommand>(client);
+                    _ = CreateGrobalCommand<QueueLoopSlashCommand>(client);
+                    _ = CreateGrobalCommand<ShuffleSlashCommand>(client);
+                    _ = CreateGrobalCommand<ResetSlashCommand>(client);
+                    // _ =CreateGuildCommand<SearchSlashCommand>(client);
+                    // _ =CreateGuildCommand<DeleteSlashCommand>(client);
+                } else {
+                    ulong guildId = Settings.GuildId;
+                    _ = CreateGuildCommand<HelpSlashCommand>(client, guildId);
+                    _ = CreateGuildCommand<JoinSlashCommand>(client, guildId);
+                    _ = CreateGuildCommand<LeaveSlashCommand>(client, guildId);
+                    _ = CreateGuildCommand<PlaySlashCommand>(client, guildId);
+                    _ = CreateGuildCommand<SkipSlashCommand>(client, guildId);
+                    _ = CreateGuildCommand<QueueSlashCommand>(client, guildId);
+                    _ = CreateGuildCommand<LoopSlashCommand>(client, guildId);
+                    _ = CreateGuildCommand<QueueLoopSlashCommand>(client, guildId);
+                    _ = CreateGuildCommand<ShuffleSlashCommand>(client, guildId);
+                    _ = CreateGuildCommand<ResetSlashCommand>(client, guildId);
+                    // _ =CreateGuildCommand<SearchSlashCommand>(client, guildId);
+                    // _ =CreateGuildCommand<DeleteSlashCommand>(client, guildId);
+                }
+
+
             } catch (HttpException exception) {
                 var json = JsonConvert.SerializeObject(exception.Errors, Formatting.Indented);
                 Console.WriteLine(json);
@@ -31,7 +54,16 @@ namespace DiscordMusicBot_dotNet.Commands {
         private static async Task CreateGuildCommand<T>(DiscordSocketClient client, ulong guildId) where T : BaseSlashCommand, new() {
             var command = new T();
             SlashCommands.Add(command.Name, command);
+            Console.WriteLine($"[DiscordMusicBotDotnet]    Register [{command.Name}] Guild Command");
             await client.Rest.CreateGuildCommand(command.CommandBuilder().Build(), guildId);
+        }
+
+        private static async Task CreateGrobalCommand<T>(DiscordSocketClient client) where T : BaseSlashCommand, new() {
+            var command = new T();
+            SlashCommands.Add(command.Name, command);
+            Console.WriteLine($"[DiscordMusicBotDotnet]    Register [{command.Name}] Global Command");
+            await client.Rest.CreateGlobalCommand(command.CommandBuilder().Build());
+
         }
 
         public static async Task SlashCommandHandler(SocketSlashCommand command) {
