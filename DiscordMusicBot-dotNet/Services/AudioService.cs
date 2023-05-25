@@ -23,26 +23,29 @@ namespace DiscordMusicBot_dotNet.Services {
             _discord = discord;
         }
 
-        public async Task JoinAudio(IGuild guild, IVoiceChannel target) {
-            if (_connectedChannels.TryGetValue(guild.Id, out _)) return;
-            if (target.Guild.Id != guild.Id) return;
+        public async Task JoinAudio(ulong? guild, IVoiceChannel target) {
+            _ = Task.Run(async () => {
+                if (guild == null) return;
+                if (_connectedChannels.TryGetValue((ulong)guild, out _)) return;
+                if (target.Guild.Id != guild) return;
 
-            var player = new AudioPlayer();
-            var test1 = await target.ConnectAsync();
-            
-            var Container = new AudioContainer {
-                AudioClient = test1,
-                CancellationTokenSource = new CancellationTokenSource(),
-                QueueManager = new QueueManager(player),
-            };
+                var player = new AudioPlayer();
 
-           
-            Container.AudioOutStream = Container.AudioClient.CreatePCMStream(AudioApplication.Music);
+                var Container = new AudioContainer {
+                    AudioClient = await target.ConnectAsync(),
+                    CancellationTokenSource = new CancellationTokenSource(),
+                    QueueManager = new QueueManager(player),
+                };
 
-            Container.QueueManager.AudioPlayer.PlaybackState = Assistor.PlaybackState.Stopped;
-            Container.QueueManager.AudioPlayer.NextPlay = true;
-   
-            _connectedChannels.TryAdd(guild.Id, Container);
+
+                Container.AudioOutStream = Container.AudioClient.CreatePCMStream(AudioApplication.Music);
+
+                Container.QueueManager.AudioPlayer.PlaybackState = Assistor.PlaybackState.Stopped;
+                Container.QueueManager.AudioPlayer.NextPlay = true;
+
+                _connectedChannels.TryAdd((ulong)guild, Container);
+            });
+            return;
         }
 
         public async Task LeaveAudio(IGuild guild) {
@@ -54,7 +57,7 @@ namespace DiscordMusicBot_dotNet.Services {
         }
 
         public async Task AddQueue(IGuild guild, IMessageChannel channel, IVoiceChannel target, string str) {
-            if (!_connectedChannels.TryGetValue(guild.Id, out _)) await JoinAudio(guild, target);
+            if (!_connectedChannels.TryGetValue(guild.Id, out _)) await JoinAudio(guild.Id, target);
             _connectedChannels.TryGetValue(guild.Id, out AudioContainer container);
             var description = "";
             var play = false;

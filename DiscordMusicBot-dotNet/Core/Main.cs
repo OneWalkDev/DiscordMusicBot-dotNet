@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using DiscordMusicBot_dotNet.Commands;
 using DiscordMusicBot_dotNet.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -13,6 +14,7 @@ namespace DiscordMusicBot_dotNet.Core {
         private CommandService _commands;
         private IServiceProvider _services;
         private TokenManager _token;
+        private AudioService _audio;
 
         public async Task MainAsync() {
             var config = new DiscordSocketConfig {
@@ -21,11 +23,13 @@ namespace DiscordMusicBot_dotNet.Core {
             _services = ConfigureServices();
             _client = new DiscordSocketClient(config);
             _client.Log += Log;
+            _client.Ready += ReadyAsync;
             _services.GetRequiredService<CommandService>().Log += Log;
-            _commands = new CommandService();
-            _client.MessageReceived += CommandRecieved;
+            //_commands = new CommandService();
+            //_client.MessageReceived += CommandRecieved;
+            _client.SlashCommandExecuted += SlashCommandManager.SlashCommandHandler;
             _token = new TokenManager();
-            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+            //await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
             await _client.LoginAsync(TokenType.Bot, _token.DiscordToken);
             await _client.StartAsync();
             await _client.SetGameAsync(null);
@@ -47,6 +51,12 @@ namespace DiscordMusicBot_dotNet.Core {
                     await context.Channel.SendMessageAsync("コマンドが見つかりませんでした。*helpでコマンド一覧を表示することができます。");
                 }
             }
+        }
+
+        private async Task ReadyAsync() {
+            _audio = new AudioService(_client);
+            await SlashCommandManager.RegisterSlashCommandAsync(_client, _audio);
+            Console.WriteLine($"{_client.CurrentUser} is connected!");
         }
 
         private ServiceProvider ConfigureServices() {

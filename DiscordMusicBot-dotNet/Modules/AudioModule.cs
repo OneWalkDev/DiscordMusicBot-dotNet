@@ -39,7 +39,7 @@ namespace DiscordMusicBot_dotNet.Command {
         [Command("join", RunMode = RunMode.Async)]
         [Alias("j")]
         public async Task Join() {
-            await _service.JoinAudio(Context.Guild, (Context.User as IVoiceState).VoiceChannel);
+           //await _service.JoinAudio(Context.Guild, (Context.User as IVoiceState).VoiceChannel);
         }
 
         [Command("Leave", RunMode = RunMode.Async)]
