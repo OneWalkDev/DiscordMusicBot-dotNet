@@ -31,7 +31,7 @@ namespace DiscordMusicBot_dotNet.Commands {
                 //$"/{Settings.SearchCommandName} : 動画をyoutubeから探す(現在非対応)\n" +
                 $"/{Settings.LoopCommandName} : 1曲ループする\n" +
                 $"/{Settings.QueueLoopCommandName} : キュー内をループする\n" +
-                $"/{Settings.ShuffleCommandName} : ループしシャッフル再生する\n" +
+                //$"/{Settings.ShuffleCommandName} : ループしシャッフル再生する\n" +
                 $"/{Settings.QueueCommandName} : キューの中に入ってる曲を表示\n" +
                 //"/delete [id] : キューから指定されたIDの音楽を削除(現在非対応)\n" +
                 $"/{Settings.ResetCommandName} : 再生を停止してキューをリセットします。\n" +
