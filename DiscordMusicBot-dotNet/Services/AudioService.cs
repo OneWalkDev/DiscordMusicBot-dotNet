@@ -195,9 +195,6 @@ namespace DiscordMusicBot_dotNet.Services {
                     var player = container.QueueManager.AudioPlayer;
                     player.QueueLoop = loop == null ? !player.QueueLoop : (bool)loop;
                     await channel.SendMessageAsync("SETTING >> キューループ " + (player.QueueLoop ? "ON" : "OFF"));
-                    if (!player.QueueLoop) {
-                        container.QueueManager.LoopDisable();
-                    }
                     return;
                 }
                 await channel.SendMessageAsync($"ERROR >> /{Settings.JoinCommandName}でVCに接続してから設定してください。");
