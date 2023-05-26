@@ -11,7 +11,7 @@ namespace DiscordMusicBot_dotNet.Commands {
         public override SlashCommandBuilder CommandBuilder() {
             var slashCommandBuilder = new SlashCommandBuilder();
             slashCommandBuilder.Name = Name;
-            slashCommandBuilder.Description = "VCに参加します";
+            slashCommandBuilder.Description = "キューに音楽を追加します。";
             slashCommandBuilder.AddOption("曲名", ApplicationCommandOptionType.String, "曲名かYoutubeのURLを入力してください。", isRequired: true);
             return slashCommandBuilder;
         }
