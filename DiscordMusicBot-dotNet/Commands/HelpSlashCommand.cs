@@ -33,9 +33,9 @@ namespace DiscordMusicBot_dotNet.Commands {
                 $"/{Settings.QueueLoopCommandName} : キュー内をループする\n" +
                 $"/{Settings.ShuffleCommandName} : シャッフル再生する\n" +
                 $"/{Settings.QueueCommandName} : キューの中に入ってる曲を表示\n" +
-                $"/{Settings.DeleteCommandName} [id] : キューから指定されたIDの音楽を削除(現在非対応)\n" +
+                $"/{Settings.DeleteCommandName} [id] : キューから指定されたIDの音楽を削除\n" +
                 $"/{Settings.ResetCommandName} : 再生を停止してキューをリセットします。\n" +
-
+                $"/{Settings.StatusCommandName} : 設定を表示します。\n" +
                 //ライセンス欄なので変更するとGPL3に違反する可能性があります
                 "\ngithub : https://github.com/yurisi0212/DiscordMusicBot-dotNet\n" +
                 "\n本プログラムはGNU General Public License v3.0に基づき配布されています。" +
