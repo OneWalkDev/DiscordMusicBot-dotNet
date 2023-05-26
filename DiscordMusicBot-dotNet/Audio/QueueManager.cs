@@ -64,27 +64,24 @@ namespace DiscordMusicBot_dotNet.Audio {
         }
 
         public Audio Next() {
+            if (AudioPlayer.Loop) {
+                return _queue[0];
+            }
+
             if (AudioPlayer.QueueLoop) {
                 _queue.Add(_queue[0]);
             }
 
-            if (AudioPlayer.Shuffle) {
-                //TODO
-            }
-
-            if (!AudioPlayer.Loop) {
-                RemoveQueue(0);
-            }
+            RemoveQueue(0);
+            
 
             if (_queue.Count == 0) return null;
-            return _queue[0];
-        }
 
-        public void LoopDisable() {
-            for (var i = 0; i < AudioPlayer.NowQueue; i++) {
-                RemoveQueue(0);
+            if (AudioPlayer.Shuffle) {
+                _queue = _queue.OrderBy(a => Guid.NewGuid()).ToList();
             }
-            AudioPlayer.NowQueue = 0;
+
+            return _queue[0];
         }
 
 

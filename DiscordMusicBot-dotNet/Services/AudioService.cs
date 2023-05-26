@@ -209,9 +209,6 @@ namespace DiscordMusicBot_dotNet.Services {
                     var player = container.QueueManager.AudioPlayer;
                     player.Shuffle = shuffle == null ? !player.Shuffle : (bool)shuffle;
                     await channel.SendMessageAsync("SETTING >> シャッフル " + (player.Shuffle ? "ON" : "OFF"));
-                    if (!player.Shuffle) {
-                        container.QueueManager.LoopDisable();
-                    }
                     return;
                 }
                 await channel.SendMessageAsync($"ERROR >> /{Settings.JoinCommandName}でVCに接続してから設定してください。");
