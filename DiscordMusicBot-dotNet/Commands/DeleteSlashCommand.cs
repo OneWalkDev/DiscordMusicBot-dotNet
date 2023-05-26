@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using DiscordMusicBot_dotNet.Services;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DiscordMusicBot_dotNet.Commands {
@@ -16,17 +17,19 @@ namespace DiscordMusicBot_dotNet.Commands {
         }
 
         public async override Task Execute(SocketSlashCommand command, AudioService service) {
-            /*var num = 1;
-            if (str.Length != 1) {
-                await ReplyAsync("曲番号を指定してください。");
+            int id;
+            if (int.TryParse(command.Data.Options.First().Value.ToString(), out id)) {
+                if (id < 2) {
+                    await command.RespondAsync("現在再生中の音楽は削除できません。2以上を指定してください。");
+                    return;
+                }
+
+                service.DeleteAudio(command.GuildId, command.Channel, id);
+                await command.RespondAsync("音楽を削除します...");
                 return;
             }
+            await command.RespondAsync("idは数字で入力してください。");
 
-            if (int.TryParse(str[0], out num)) {
-
-            }*/
-            // TODO
-            await command.RespondAsync("未実装");
         }
     }
 }

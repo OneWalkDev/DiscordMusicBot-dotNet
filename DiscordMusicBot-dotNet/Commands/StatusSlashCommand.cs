@@ -4,20 +4,20 @@ using DiscordMusicBot_dotNet.Services;
 using System.Threading.Tasks;
 
 namespace DiscordMusicBot_dotNet.Commands {
-    public class JoinSlashCommand : BaseSlashCommand {
-        public override string Name => Settings.JoinCommandName;
+    public class StatusSlashCommand : BaseSlashCommand {
+        public override string Name => Settings.StatusCommandName;
 
         public override SlashCommandBuilder CommandBuilder() {
             var slashCommandBuilder = new SlashCommandBuilder();
             slashCommandBuilder.Name = Name;
-            slashCommandBuilder.Description = "VCに参加します";
+            slashCommandBuilder.Description = "現在の設定を確認します。";
 
             return slashCommandBuilder;
         }
 
         public async override Task Execute(SocketSlashCommand command, AudioService service) {
-            await command.RespondAsync("参加します...");
-            await service.JoinAudio(command.GuildId, command.Channel, (command.User as IVoiceState).VoiceChannel);
+            await command.RespondAsync("確認中...");
+            service.GetStatus(command.GuildId, command.Channel);
         }
     }
 }

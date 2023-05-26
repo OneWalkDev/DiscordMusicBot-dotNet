@@ -33,8 +33,12 @@ namespace DiscordMusicBot_dotNet.Audio {
             _queue.RemoveAt(index);
         }
 
-        public Audio GetAudio() {
+        public Audio GetNowAudio() {
             return _queue[AudioPlayer.NowQueue];
+        }
+
+        public bool ExistsQueueIndex(int index) {
+            return _queue.Count - 1 >= index;
         }
 
         public int GetQueueCount() {
@@ -85,15 +89,6 @@ namespace DiscordMusicBot_dotNet.Audio {
         }
 
 
-        public int GetRandomIndex() {
-            while (true) {
-                var rand = new Random().Next(0, _queue.Count);
-                if (rand != AudioPlayer.NowQueue) {
-                    return rand;
-                }
-            }
-        }
-
         public void Reset() {
             _queue = new();
             AudioPlayer.NowQueue = 0;
@@ -101,8 +96,14 @@ namespace DiscordMusicBot_dotNet.Audio {
             AudioPlayer.Shuffle = false;
         }
 
-        public void Delete(int num) {
-
+        public Audio? Delete(int userSelectNum) {
+            var num = userSelectNum - 1;
+            if (ExistsQueueIndex(num)) {
+                var audio = _queue[num];
+                RemoveQueue(num);
+                return audio;
+            }
+            return null;
         }
     }
 }

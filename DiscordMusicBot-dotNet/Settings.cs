@@ -83,5 +83,10 @@
         /// </summary>
         public const string ResetCommandName = "reset";
 
+        ///<summary>
+        /// statusコマンドの名前
+        /// </summary>
+        public const string StatusCommandName = "status";
+
     }
 }

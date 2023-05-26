@@ -28,7 +28,7 @@ namespace DiscordMusicBot_dotNet.Commands {
                 if (id == 0) id = 1;
                 
 
-                await service.GetQueueList(command.GuildId, command.Channel, id);
+                service.GetQueueList(command.GuildId, command.Channel, id);
             });
 
             await command.RespondAsync("キューを読み込み中...");
