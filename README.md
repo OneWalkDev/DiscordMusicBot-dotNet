@@ -38,7 +38,7 @@ Settings.csのGrobalがtrueの場合コマンドが登録されるまで時間�
 - [ ] 詳細な検索 
 - [x] キューループ
 - [x] 1曲ループ
-- [ ] シャッフル    
+- [x] シャッフル    
 
 ## Builds (Special Thanks)
 
