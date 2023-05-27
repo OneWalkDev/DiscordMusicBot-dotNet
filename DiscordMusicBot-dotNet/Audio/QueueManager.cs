@@ -29,12 +29,20 @@ namespace DiscordMusicBot_dotNet.Audio {
             _queue.Add(audio);
         }
 
+        public void AddNextQueue(Audio audio) {
+            _queue.Insert(1, audio);
+        }
+
         public void RemoveQueue(int index) {
             _queue.RemoveAt(index);
         }
 
-        public Audio GetAudio() {
+        public Audio GetNowAudio() {
             return _queue[AudioPlayer.NowQueue];
+        }
+
+        public bool ExistsQueueIndex(int index) {
+            return _queue.Count - 1 >= index;
         }
 
         public int GetQueueCount() {
@@ -64,43 +72,26 @@ namespace DiscordMusicBot_dotNet.Audio {
         }
 
         public Audio Next() {
+            if (AudioPlayer.Loop) {
+                return _queue[0];
+            }
+
             if (AudioPlayer.QueueLoop) {
-                if (_queue.Count - 1 == AudioPlayer.NowQueue) {
-                    AudioPlayer.NowQueue = 0;
-                } else {
-                    AudioPlayer.NowQueue += 1;
-                }
-                return _queue[AudioPlayer.NowQueue];
+                _queue.Add(_queue[0]);
             }
 
-            if (AudioPlayer.Shuffle) {
-                //TODO
-            }
-
-            if (!AudioPlayer.Loop) {
-                RemoveQueue(0);
-            }
+            RemoveQueue(0);
+            
 
             if (_queue.Count == 0) return null;
+
+            if (AudioPlayer.Shuffle) {
+                _queue = _queue.OrderBy(a => Guid.NewGuid()).ToList();
+            }
+
             return _queue[0];
         }
 
-        public void LoopDisable() {
-            for (var i = 0; i < AudioPlayer.NowQueue; i++) {
-                RemoveQueue(0);
-            }
-            AudioPlayer.NowQueue = 0;
-        }
-
-
-        public int GetRandomIndex() {
-            while (true) {
-                var rand = new Random().Next(0, _queue.Count);
-                if (rand != AudioPlayer.NowQueue) {
-                    return rand;
-                }
-            }
-        }
 
         public void Reset() {
             _queue = new();
@@ -109,8 +100,14 @@ namespace DiscordMusicBot_dotNet.Audio {
             AudioPlayer.Shuffle = false;
         }
 
-        public void Delete(int num) {
-
+        public Audio? Delete(int userSelectNum) {
+            var num = userSelectNum - 1;
+            if (ExistsQueueIndex(num)) {
+                var audio = _queue[num];
+                RemoveQueue(num);
+                return audio;
+            }
+            return null;
         }
     }
 }
