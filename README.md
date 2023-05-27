@@ -25,6 +25,8 @@ Settings.csでオプションを変更してください
 
 ビルド後exeファイルのあるディレクトリ内に Opus.dll libsodium.dll ffmpeg.exeを配置しないと起動しません。　
 
+linuxで動かす場合はパッケージマネージャーでffmpeg、opus、libsodiumをダウンロードしてください。(合うものが見つからなかった...)
+
 Settings.csのGrobalがtrueの場合コマンドが登録されるまで時間がかかりますのでお待ち下さい(discordの仕様です)
 
 ## TODO 
