@@ -117,6 +117,40 @@ namespace DiscordMusicBot_dotNet.Services {
             return;
         }
 
+        public void NextAddQueue(ulong? guild, IMessageChannel channel, IVoiceChannel target, string str) {
+            _ = Task.Run(async () => {
+                if (guild == null) return;
+                if (_connectedChannels.TryGetValue((ulong)guild, out AudioContainer container)) {
+                    var type = StreamHelper.GetType(str).Result;
+                    if (type == YoutubeType.Playlist) {
+                        await channel.SendMessageAsync($"ERROR >> プレイリストは追加できません。");
+                        return;
+                    }
+
+                    var music = container.QueueManager.GetAudioFromString(str, type);
+                    if (music.Title == null || music.Path == null || music.Url == null) {
+                        await channel.SendMessageAsync("ERROR >> 結果が見つかりませんでした。");
+                        return;
+                    }
+
+                    if (!container.QueueManager.IsQueueinMusic()) {
+                        await channel.SendMessageAsync($"ERROR >> 現在音楽が再生されているときのみに追加できます");
+                        return;
+                    }
+
+                    container.QueueManager.AddNextQueue(music);
+                    var embed = new EmbedBuilder();
+                    embed.WithTitle("割り込み追加");
+                    embed.WithColor(Color.Green);
+                    embed.WithTimestamp(DateTime.Now);
+                    embed.WithDescription(music.Title);
+                    await channel.SendMessageAsync(embed: embed.Build());
+                    return;
+                }
+                await channel.SendMessageAsync($"ERROR >> /{Settings.JoinCommandName}でVCに接続してから実行してください。");
+            });
+        }
+
         public async Task SendAudioAsync(ulong guild, IMessageChannel channel, Audio.Audio music) {
             if (_connectedChannels.TryGetValue(guild, out AudioContainer container)) {
                 var audioOutStream = container.AudioOutStream;

@@ -27,15 +27,16 @@ namespace DiscordMusicBot_dotNet.Commands {
                 $"/{Settings.JoinCommandName} : botを入室\n" +
                 $"/{Settings.LeaveCommandName} : botが退出\n" +
                 $"/{Settings.PlayCommandName} [YoutubeURL,検索したいワード] : 曲をキューに追加\n" +
+                $"/{Settings.NextPlayCommandName} [YoutubeURL,検索したいワード] : 曲をキューの先頭に割り込み追加\n" +
+                $"/{Settings.DeleteCommandName} [id] : キューから指定されたIDの音楽を削除\n" +
+                $"/{Settings.QueueCommandName} : キューの中に入ってる曲を表示\n" +
                 $"/{Settings.SkipCommandName} : 曲をスキップ\n" +
                 //$"/{Settings.SearchCommandName} : 動画をyoutubeから探す(現在非対応)\n" +
                 $"/{Settings.LoopCommandName} : 1曲ループする\n" +
                 $"/{Settings.QueueLoopCommandName} : キュー内をループする\n" +
                 $"/{Settings.ShuffleCommandName} : シャッフル再生する\n" +
-                $"/{Settings.QueueCommandName} : キューの中に入ってる曲を表示\n" +
-                $"/{Settings.DeleteCommandName} [id] : キューから指定されたIDの音楽を削除\n" +
-                $"/{Settings.ResetCommandName} : 再生を停止してキューをリセットします。\n" +
                 $"/{Settings.StatusCommandName} : 設定を表示します。\n" +
+                $"/{Settings.ResetCommandName} : 再生を停止してキューをリセットします。\n" +
                 //ライセンス欄なので変更するとGPL3に違反する可能性があります
                 "\ngithub : https://github.com/yurisi0212/DiscordMusicBot-dotNet\n" +
                 "\n本プログラムはGNU General Public License v3.0に基づき配布されています。" +

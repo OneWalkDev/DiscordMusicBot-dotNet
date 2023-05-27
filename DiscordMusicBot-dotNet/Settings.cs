@@ -88,5 +88,9 @@
         /// </summary>
         public const string StatusCommandName = "status";
 
+        ///<summary>
+        /// nextplayコマンドの名前
+        /// </summary>
+        public const string NextPlayCommandName = "nextplay";
     }
 }

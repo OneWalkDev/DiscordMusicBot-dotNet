@@ -28,6 +28,7 @@ namespace DiscordMusicBot_dotNet.Commands {
                     _ = CreateGrobalCommand<ResetSlashCommand>(client);
                     _ = CreateGrobalCommand<DeleteSlashCommand>(client);
                     _ = CreateGrobalCommand<StatusSlashCommand>(client);
+                    _ = CreateGrobalCommand<NextPlaySlashCommand>(client);
                     // _ =CreateGrobalCommand<SearchSlashCommand>(client);
 
                 } else {
@@ -44,6 +45,7 @@ namespace DiscordMusicBot_dotNet.Commands {
                     _ = CreateGuildCommand<ResetSlashCommand>(client, guildId);
                     _ = CreateGuildCommand<DeleteSlashCommand>(client, guildId);
                     _ = CreateGuildCommand<StatusSlashCommand>(client, guildId);
+                    _ = CreateGuildCommand<NextPlaySlashCommand>(client, guildId);
                     // _ =CreateGuildCommand<SearchSlashCommand>(client, guildId);
                 }
 

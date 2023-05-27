@@ -29,6 +29,10 @@ namespace DiscordMusicBot_dotNet.Audio {
             _queue.Add(audio);
         }
 
+        public void AddNextQueue(Audio audio) {
+            _queue.Insert(1, audio);
+        }
+
         public void RemoveQueue(int index) {
             _queue.RemoveAt(index);
         }
