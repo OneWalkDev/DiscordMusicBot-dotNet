@@ -38,6 +38,8 @@ namespace DiscordMusicBot_dotNet.Commands {
                 $"/{Setting.Data.ShuffleCommandName} : シャッフル再生する\n" +
                 $"/{Setting.Data.StatusCommandName} : 設定を表示します。\n" +
                 $"/{Setting.Data.ResetCommandName} : 再生を停止してキューをリセットします。\n" +
+
+                "音楽再生中等に何らかの原因によりBotがVCから切断されてしまった場合は/leaveコマンドを1度送信すると正常に動くようになると思います" +
                 //ライセンス欄なので変更するとGPL3に違反する可能性があります
                 "\ngithub : https://github.com/yurisi0212/DiscordMusicBot-dotNet\n" +
                 "\n本プログラムはGNU General Public License v3.0に基づき配布されています。" +
