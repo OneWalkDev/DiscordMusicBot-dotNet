@@ -22,6 +22,8 @@ settings.iniのTokenにDiscordDeveloperPortalから取得したトークンを�
 
 settings.iniのGrobalがtrueの場合コマンドが登録されるまで時間がかかりますのでお待ち下さい。(discordの仕様です)
 
+linuxで動かす場合はパッケージマネージャーでffmpeg、opus、libsodiumをダウンロードしてください。(合うものが見つからなかった...)
+
 ## TODO 
 
 - [x] スラッシュコマンドの実装
