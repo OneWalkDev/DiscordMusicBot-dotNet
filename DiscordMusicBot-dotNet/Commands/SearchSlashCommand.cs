@@ -1,12 +1,13 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using DiscordMusicBot_dotNet.Configurations;
 using DiscordMusicBot_dotNet.Services;
 using System;
 using System.Threading.Tasks;
 
 namespace DiscordMusicBot_dotNet.Commands {
     public class SearchSlashCommand : BaseSlashCommand {
-        public override string Name => Settings.SearchCommandName;
+        public override string Name => Setting.Data.SearchCommandName;
 
         public override SlashCommandBuilder CommandBuilder() {
             var slashCommandBuilder = new SlashCommandBuilder();

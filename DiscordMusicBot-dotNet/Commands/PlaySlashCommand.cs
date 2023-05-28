@@ -1,12 +1,13 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using DiscordMusicBot_dotNet.Configurations;
 using DiscordMusicBot_dotNet.Services;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace DiscordMusicBot_dotNet.Commands {
     public class PlaySlashCommand : BaseSlashCommand {
-        public override string Name => Settings.PlayCommandName;
+        public override string Name => Setting.Data.PlayCommandName;
 
         public override SlashCommandBuilder CommandBuilder() {
             var slashCommandBuilder = new SlashCommandBuilder();

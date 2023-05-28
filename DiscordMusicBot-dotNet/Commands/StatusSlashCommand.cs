@@ -1,11 +1,12 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using DiscordMusicBot_dotNet.Configurations;
 using DiscordMusicBot_dotNet.Services;
 using System.Threading.Tasks;
 
 namespace DiscordMusicBot_dotNet.Commands {
     public class StatusSlashCommand : BaseSlashCommand {
-        public override string Name => Settings.StatusCommandName;
+        public override string Name => Setting.Data.StatusCommandName;
 
         public override SlashCommandBuilder CommandBuilder() {
             var slashCommandBuilder = new SlashCommandBuilder();

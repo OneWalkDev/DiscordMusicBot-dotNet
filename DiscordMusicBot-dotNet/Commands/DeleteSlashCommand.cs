@@ -1,18 +1,19 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using DiscordMusicBot_dotNet.Configurations;
 using DiscordMusicBot_dotNet.Services;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace DiscordMusicBot_dotNet.Commands {
     internal class DeleteSlashCommand : BaseSlashCommand {
-        public override string Name => Settings.DeleteCommandName;
+        public override string Name => Setting.Data.DeleteCommandName;
 
         public override SlashCommandBuilder CommandBuilder() {
             var slashCommandBuilder = new SlashCommandBuilder();
             slashCommandBuilder.Name = Name;
             slashCommandBuilder.Description = "指定のIDの曲をキューから削除します";
-            slashCommandBuilder.AddOption("id", ApplicationCommandOptionType.Integer, $"削除する曲のid(/{Settings.QueueCommandName}で確認できます)", isRequired: true);
+            slashCommandBuilder.AddOption("id", ApplicationCommandOptionType.Integer, $"削除する曲のid(/{Setting.Data.QueueCommandName}で確認できます)", isRequired: true);
             return slashCommandBuilder;
         }
 

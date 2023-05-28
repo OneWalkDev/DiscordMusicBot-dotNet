@@ -1,11 +1,12 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using DiscordMusicBot_dotNet.Configurations;
 using DiscordMusicBot_dotNet.Services;
 using System.Threading.Tasks;
 
 namespace DiscordMusicBot_dotNet.Commands {
     public class LeaveSlashCommand : BaseSlashCommand {
-        public override string Name => Settings.LeaveCommandName;
+        public override string Name => Setting.Data.LeaveCommandName;
 
         public override SlashCommandBuilder CommandBuilder() {
             var slashCommandBuilder = new SlashCommandBuilder();

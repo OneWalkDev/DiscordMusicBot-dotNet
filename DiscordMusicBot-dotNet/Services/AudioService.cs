@@ -3,6 +3,7 @@ using Discord.Audio;
 using Discord.WebSocket;
 using DiscordMusicBot_dotNet.Assistor;
 using DiscordMusicBot_dotNet.Audio;
+using DiscordMusicBot_dotNet.Configurations;
 using DiscordMusicBot_dotNet.Core;
 using NAudio.Wave;
 using System;
@@ -147,7 +148,7 @@ namespace DiscordMusicBot_dotNet.Services {
                     await channel.SendMessageAsync(embed: embed.Build());
                     return;
                 }
-                await channel.SendMessageAsync($"ERROR >> /{Settings.JoinCommandName}でVCに接続してから実行してください。");
+                await channel.SendMessageAsync($"ERROR >> /{Setting.Data.JoinCommandName}でVCに接続してから実行してください。");
             });
         }
 
@@ -183,7 +184,7 @@ namespace DiscordMusicBot_dotNet.Services {
                 if (_connectedChannels.TryGetValue((ulong)guild, out AudioContainer container)) {
                     var audio = container.QueueManager.Delete(num);
                     if (audio == null) {
-                        await channel.SendMessageAsync($"ERROR >>idが存在しなかったようです。{Settings.QueueCommandName}でもう一度確認してください。");
+                        await channel.SendMessageAsync($"ERROR >>idが存在しなかったようです。{Setting.Data.QueueCommandName}でもう一度確認してください。");
                         return;
                     }
                     var embed = new EmbedBuilder();
@@ -194,7 +195,7 @@ namespace DiscordMusicBot_dotNet.Services {
                     await channel.SendMessageAsync(embed: embed.Build());
                     return;
                 }
-                await channel.SendMessageAsync($"ERROR >> /{Settings.JoinCommandName}でVCに接続してから実行してください。");
+                await channel.SendMessageAsync($"ERROR >> /{Setting.Data.JoinCommandName}でVCに接続してから実行してください。");
             });
         }
 
@@ -206,10 +207,10 @@ namespace DiscordMusicBot_dotNet.Services {
                         container.CancellationTokenSource.Cancel();
                         return;
                     }
-                    await channel.SendMessageAsync($"ERROR >> 現在読込中です。しばらくお待ちいただくか、/{Settings.LeaveCommandName}で退出させてもう一度曲を入れ直してみてください。");
+                    await channel.SendMessageAsync($"ERROR >> 現在読込中です。しばらくお待ちいただくか、/{Setting.Data.LeaveCommandName}で退出させてもう一度曲を入れ直してみてください。");
                     return;
                 }
-                await channel.SendMessageAsync($"ERROR >> 音楽を再生する場合は/{Settings.JoinCommandName}か/{Settings.PlayCommandName}でbotを参加させてください。");
+                await channel.SendMessageAsync($"ERROR >> 音楽を再生する場合は/{Setting.Data.JoinCommandName}か/{Setting.Data.PlayCommandName}でbotを参加させてください。");
             });
             return;
         }
@@ -225,7 +226,7 @@ namespace DiscordMusicBot_dotNet.Services {
                     await channel.SendMessageAsync("NOTICE >> キューをリセットしました");
                     return;
                 }
-                await channel.SendMessageAsync($"ERROR >> /{Settings.JoinCommandName}でVCに接続してから実行してください。");
+                await channel.SendMessageAsync($"ERROR >> /{Setting.Data.JoinCommandName}でVCに接続してから実行してください。");
             });
         }
 
@@ -238,7 +239,7 @@ namespace DiscordMusicBot_dotNet.Services {
                     await channel.SendMessageAsync("SETTING >> ループ " + (player.Loop ? "ON" : "OFF"));
                     return;
                 }
-                await channel.SendMessageAsync($"ERROR >> /{Settings.JoinCommandName}でVCに接続してから設定してください。");
+                await channel.SendMessageAsync($"ERROR >> /{Setting.Data.JoinCommandName}でVCに接続してから設定してください。");
             });
         }
 
@@ -251,7 +252,7 @@ namespace DiscordMusicBot_dotNet.Services {
                     await channel.SendMessageAsync("SETTING >> キューループ " + (player.QueueLoop ? "ON" : "OFF"));
                     return;
                 }
-                await channel.SendMessageAsync($"ERROR >> /{Settings.JoinCommandName}でVCに接続してから設定してください。");
+                await channel.SendMessageAsync($"ERROR >> /{Setting.Data.JoinCommandName}でVCに接続してから設定してください。");
             });
         }
 
@@ -265,7 +266,7 @@ namespace DiscordMusicBot_dotNet.Services {
                     await channel.SendMessageAsync("SETTING >> シャッフル " + (player.Shuffle ? "ON" : "OFF"));
                     return;
                 }
-                await channel.SendMessageAsync($"ERROR >> /{Settings.JoinCommandName}でVCに接続してから設定してください。");
+                await channel.SendMessageAsync($"ERROR >> /{Setting.Data.JoinCommandName}でVCに接続してから設定してください。");
             });
         }
 
@@ -295,7 +296,7 @@ namespace DiscordMusicBot_dotNet.Services {
                     await channel.SendMessageAsync(embed: embed.Build());
                     return;
                 }
-                await channel.SendMessageAsync($"ERROR >> /{Settings.JoinCommandName}でVCに接続してから実行してください。");
+                await channel.SendMessageAsync($"ERROR >> /{Setting.Data.JoinCommandName}でVCに接続してから実行してください。");
             });
             return;
         }
@@ -321,7 +322,7 @@ namespace DiscordMusicBot_dotNet.Services {
                     await channel.SendMessageAsync(embed: embed.Build());
                     return;
                 }
-                await channel.SendMessageAsync($"ERROR >> /{Settings.JoinCommandName}でVCに接続してから実行してください。");
+                await channel.SendMessageAsync($"ERROR >> /{Setting.Data.JoinCommandName}でVCに接続してから実行してください。");
             });
         }
     }
