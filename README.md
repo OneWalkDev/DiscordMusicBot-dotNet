@@ -1,4 +1,5 @@
 # DiscordMusicBot-dotNet
+
 Discordの音楽bot 
 
 Discord.netを使用しています。
@@ -7,7 +8,7 @@ Discord.netを使用しています。
 
 Discordでダウンロードせずyoutubeの音楽を流すbotです。 
 
-スラッシュコマンド版です(beta)
+スラッシュコマンド版です
 
 現在開発中です。 
 
@@ -17,15 +18,9 @@ https://github.com/yurisi0212/DiscordMusicBot-dotNet/releases
 
 リリースから最新バージョンをダウンロードしてください。
 
-TokenManagerのDiscordTokenにトークンを入力すれば使えます。  
+settings.iniのTokenにDiscordDeveloperPortalから取得したトークンを貼り付け、必要であれば他のオプションも変更してください。
 
-Settings.csでオプションを変更してください
-
-ビルドはx64でしてください。
-
-ビルド後exeファイルのあるディレクトリ内に Opus.dll libsodium.dll ffmpeg.exeを配置しないと起動しません。　
-
-Settings.csのGrobalがtrueの場合コマンドが登録されるまで時間がかかりますのでお待ち下さい(discordの仕様です)
+settings.iniのGrobalがtrueの場合コマンドが登録されるまで時間がかかりますのでお待ち下さい。(discordの仕様です)
 
 ## TODO 
 
@@ -38,7 +33,7 @@ Settings.csのGrobalがtrueの場合コマンドが登録されるまで時間�
 - [ ] 詳細な検索 
 - [x] キューループ
 - [x] 1曲ループ
-- [ ] シャッフル    
+- [x] シャッフル    
 
 ## Builds (Special Thanks)
 
