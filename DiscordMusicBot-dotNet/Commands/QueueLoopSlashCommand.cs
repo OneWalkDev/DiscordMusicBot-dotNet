@@ -1,12 +1,13 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using DiscordMusicBot_dotNet.Configurations;
 using DiscordMusicBot_dotNet.Services;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace DiscordMusicBot_dotNet.Commands {
     public class QueueLoopSlashCommand : BaseSlashCommand {
-        public override string Name => Settings.QueueLoopCommandName;
+        public override string Name => Setting.Data.QueueLoopCommandName;
 
         public override SlashCommandBuilder CommandBuilder() {
             var choice = new ApplicationCommandOptionChoiceProperties[2] {

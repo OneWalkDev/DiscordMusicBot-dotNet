@@ -1,12 +1,13 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using DiscordMusicBot_dotNet.Configurations;
 using DiscordMusicBot_dotNet.Services;
 using System;
 using System.Threading.Tasks;
 
 namespace DiscordMusicBot_dotNet.Commands {
     internal class ResetSlashCommand : BaseSlashCommand {
-        public override string Name => Settings.ResetCommandName;
+        public override string Name => Setting.Data.ResetCommandName;
 
         public override SlashCommandBuilder CommandBuilder() {
             var slashCommandBuilder = new SlashCommandBuilder();

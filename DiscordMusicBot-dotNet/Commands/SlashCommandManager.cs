@@ -1,5 +1,6 @@
 ﻿using Discord.Net;
 using Discord.WebSocket;
+using DiscordMusicBot_dotNet.Configurations;
 using DiscordMusicBot_dotNet.Services;
 using Newtonsoft.Json;
 using System;
@@ -12,10 +13,10 @@ namespace DiscordMusicBot_dotNet.Commands {
         private static readonly Dictionary<string, BaseSlashCommand> SlashCommands = new();
         private static AudioService _service;
 
-        public async static Task RegisterSlashCommand(DiscordSocketClient client, AudioService service) {
+        public static void RegisterSlashCommand(DiscordSocketClient client, AudioService service) {
             _service = service;
             try {
-                if (Settings.Global) {
+                if (Setting.Data.Global) {
                     _ = CreateGrobalCommand<HelpSlashCommand>(client);
                     _ = CreateGrobalCommand<JoinSlashCommand>(client);
                     _ = CreateGrobalCommand<LeaveSlashCommand>(client);
@@ -32,7 +33,7 @@ namespace DiscordMusicBot_dotNet.Commands {
                     // _ =CreateGrobalCommand<SearchSlashCommand>(client);
 
                 } else {
-                    ulong guildId = Settings.GuildId;
+                    ulong guildId = (ulong)Setting.Data.GuildId;
                     _ = CreateGuildCommand<HelpSlashCommand>(client, guildId);
                     _ = CreateGuildCommand<JoinSlashCommand>(client, guildId);
                     _ = CreateGuildCommand<LeaveSlashCommand>(client, guildId);

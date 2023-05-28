@@ -1,11 +1,12 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using DiscordMusicBot_dotNet.Configurations;
 using DiscordMusicBot_dotNet.Services;
 using System.Threading.Tasks;
 
 namespace DiscordMusicBot_dotNet.Commands {
     internal class SkipSlashCommand : BaseSlashCommand {
-        public override string Name => Settings.SkipCommandName;
+        public override string Name => Setting.Data.SkipCommandName;
 
         public override SlashCommandBuilder CommandBuilder() {
             var slashCommandBuilder = new SlashCommandBuilder();

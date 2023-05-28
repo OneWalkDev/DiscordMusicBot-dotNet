@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using DiscordMusicBot_dotNet.Configurations;
 using DiscordMusicBot_dotNet.Services;
 using System;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DiscordMusicBot_dotNet.Commands {
     public class QueueSlashCommand : BaseSlashCommand {
-        public override string Name => Settings.QueueCommandName;
+        public override string Name => Setting.Data.QueueCommandName;
 
         public override SlashCommandBuilder CommandBuilder() {
             var slashCommandBuilder = new SlashCommandBuilder();

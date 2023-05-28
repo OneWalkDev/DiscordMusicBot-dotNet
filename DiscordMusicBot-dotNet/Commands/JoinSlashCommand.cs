@@ -1,11 +1,12 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using DiscordMusicBot_dotNet.Configurations;
 using DiscordMusicBot_dotNet.Services;
 using System.Threading.Tasks;
 
 namespace DiscordMusicBot_dotNet.Commands {
     public class JoinSlashCommand : BaseSlashCommand {
-        public override string Name => Settings.JoinCommandName;
+        public override string Name => Setting.Data.JoinCommandName;
 
         public override SlashCommandBuilder CommandBuilder() {
             var slashCommandBuilder = new SlashCommandBuilder();

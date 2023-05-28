@@ -1,12 +1,13 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using DiscordMusicBot_dotNet.Configurations;
 using DiscordMusicBot_dotNet.Services;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace DiscordMusicBot_dotNet.Commands {
     internal class ShuffleSlashCommand : BaseSlashCommand {
-        public override string Name => Settings.ShuffleCommandName;
+        public override string Name => Setting.Data.ShuffleCommandName;
 
         public override SlashCommandBuilder CommandBuilder() {
             var choice = new ApplicationCommandOptionChoiceProperties[2] {
