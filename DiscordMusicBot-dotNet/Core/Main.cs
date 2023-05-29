@@ -23,11 +23,9 @@ namespace DiscordMusicBot_dotNet.Core {
             if (Setting.Data.AutoLeave) _client.UserVoiceStateUpdated += UserVoiceStateUpdatedHandler;
             await _client.LoginAsync(TokenType.Bot, Setting.Data.Token);
             await _client.StartAsync();
-            if (Setting.Data.ShowActivity) {
-                while (true) {
-                    await ClientSetGameAsync();
-                    await Task.Delay(10000);
-                }
+            while (Setting.Data.ShowActivity) {
+                await ClientSetGameAsync();
+                await Task.Delay(10000);
             }
             await Task.Delay(-1);
         }
