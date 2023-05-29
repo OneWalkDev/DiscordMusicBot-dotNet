@@ -6,11 +6,13 @@ using DiscordMusicBot_dotNet.Configurations;
 using System;
 using System.Threading.Tasks;
 using DiscordMusicBot_dotNet.Exception;
+using System.Linq;
+
 
 namespace DiscordMusicBot_dotNet.Core {
     class Main {
         private DiscordSocketClient _client;
-        private AudioService _audio;
+        private AudioService _service;
 
         public async Task MainAsync() {
             Settings();
@@ -18,6 +20,7 @@ namespace DiscordMusicBot_dotNet.Core {
             _client.Log += Log;
             _client.Ready += ReadyAsync;
             _client.SlashCommandExecuted += SlashCommandManager.SlashCommandHandler;
+            if (Setting.Data.AutoLeave) _client.UserVoiceStateUpdated += UserVoiceStateUpdatedHandler;
             await _client.LoginAsync(TokenType.Bot, Setting.Data.Token);
             await _client.StartAsync();
             await _client.SetGameAsync("");
@@ -25,8 +28,8 @@ namespace DiscordMusicBot_dotNet.Core {
         }
 
         private async Task ReadyAsync() {
-            _audio = new AudioService(_client);
-            SlashCommandManager.RegisterSlashCommand(_client, _audio);
+            _service = new AudioService(_client);
+            SlashCommandManager.RegisterSlashCommand(_client, _service);
         }
 
         private Task Log(LogMessage message) {
@@ -45,6 +48,17 @@ namespace DiscordMusicBot_dotNet.Core {
                 Console.WriteLine("settings.iniが破損または存在していません。");
                 Environment.Exit(1);
             }
+        }
+
+        private async Task UserVoiceStateUpdatedHandler(SocketUser user, SocketVoiceState before, SocketVoiceState after) {
+            var beforeVC = before.VoiceChannel;
+            if (beforeVC == null) return;
+            if (beforeVC.ConnectedUsers.Any(u => u.Id == _client.CurrentUser.Id)) {
+                if(beforeVC.ConnectedUsers.Count == 1) {
+                    await _service.LeaveAudio(before.VoiceChannel.Guild.Id);
+                }
+            }
+            
         }
 
     }
