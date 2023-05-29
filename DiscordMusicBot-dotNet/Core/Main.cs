@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using DiscordMusicBot_dotNet.Exception;
 using System.Linq;
 
-
 namespace DiscordMusicBot_dotNet.Core {
     class Main {
         private DiscordSocketClient _client;
@@ -16,25 +15,18 @@ namespace DiscordMusicBot_dotNet.Core {
 
         public async Task MainAsync() {
             Settings();
+
             _client = new DiscordSocketClient();
-            _client.Log += Log;
-            _client.Ready += ReadyAsync;
-            _client.SlashCommandExecuted += SlashCommandManager.SlashCommandHandler;
-            if (Setting.Data.AutoLeave) _client.UserVoiceStateUpdated += UserVoiceStateUpdatedHandler;
+            _client.Log += LogHandler;
+            _client.Ready += ReadyHandler;
+            _client.SlashCommandExecuted += SlashCommandManager.SlashCommandExecutedHandler;
+            if (Setting.Data.ShowActivity) _client.JoinedGuild += JoinedGuildHundler;
+            if (Setting.Data.ShowActivity) _client.LeftGuild += LeftGuildHundler;
+            _client.UserVoiceStateUpdated += UserVoiceStateUpdatedHandler;
             await _client.LoginAsync(TokenType.Bot, Setting.Data.Token);
             await _client.StartAsync();
-            await _client.SetGameAsync("");
+
             await Task.Delay(-1);
-        }
-
-        private async Task ReadyAsync() {
-            _service = new AudioService(_client);
-            SlashCommandManager.RegisterSlashCommand(_client, _service);
-        }
-
-        private Task Log(LogMessage message) {
-            Console.WriteLine(message.ToString());
-            return Task.CompletedTask;
         }
 
         private void Settings() {
@@ -45,21 +37,58 @@ namespace DiscordMusicBot_dotNet.Core {
                 Console.WriteLine(e.Message);
                 Environment.Exit(1);
             } catch {
-                Console.WriteLine("settings.iniが破損または存在していません。");
+                Console.WriteLine("settings.iniが破損しているか、存在していません。");
                 Environment.Exit(1);
             }
         }
 
-        private async Task UserVoiceStateUpdatedHandler(SocketUser user, SocketVoiceState before, SocketVoiceState after) {
-            var beforeVC = before.VoiceChannel;
-            if (beforeVC == null) return;
-            if (beforeVC.ConnectedUsers.Any(u => u.Id == _client.CurrentUser.Id)) {
-                if(beforeVC.ConnectedUsers.Count == 1) {
-                    await _service.LeaveAudio(before.VoiceChannel.Guild.Id);
-                }
-            }
-            
+        private Task LogHandler(LogMessage message) {
+            Console.WriteLine(message.ToString());
+            return Task.CompletedTask;
         }
 
+
+        private async Task ReadyHandler() {
+            _service = new AudioService(_client);
+            SlashCommandManager.RegisterSlashCommand(_client, _service);
+            await ClientSetGameAsync();
+        }
+
+        private async Task UserVoiceStateUpdatedHandler(SocketUser user, SocketVoiceState before, SocketVoiceState after) {
+
+            if (Setting.Data.ShowActivity) {
+                await ClientSetGameAsync();
+            }
+
+            if (Setting.Data.AutoLeave) {
+                var beforeVC = before.VoiceChannel;
+                if (beforeVC == null) return;
+                if (beforeVC.ConnectedUsers.Any(u => u.Id == _client.CurrentUser.Id)) {
+                    if (beforeVC.ConnectedUsers.Count == 1) {
+                        await _service.LeaveAudio(before.VoiceChannel.Guild.Id);
+                    }
+                }
+            }
+        }
+
+        private async Task JoinedGuildHundler(SocketGuild guild) {
+            await ClientSetGameAsync();
+        }
+
+        private async Task LeftGuildHundler(SocketGuild guild) {
+            await ClientSetGameAsync();
+        }
+
+        private async Task ClientSetGameAsync() {
+            var vcCount = 0;
+            foreach (var guild in _client.Guilds) {
+                foreach (var vc in guild.VoiceChannels) {
+                    if (vc.ConnectedUsers.Any(u => u.Id == _client.CurrentUser.Id)) {
+                        vcCount++;
+                    }
+                }
+            }
+            await _client.SetGameAsync("♫MusicPlayer♫ /join | " + _client.Guilds.Count.ToString() + " servers | " + vcCount.ToString() + " vc");
+        }
     }
 }

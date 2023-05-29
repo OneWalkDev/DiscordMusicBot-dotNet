@@ -72,7 +72,7 @@ namespace DiscordMusicBot_dotNet.Commands {
 
         }
 
-        public static async Task SlashCommandHandler(SocketSlashCommand command) {
+        public static async Task SlashCommandExecutedHandler(SocketSlashCommand command) {
             if (!SlashCommands.ContainsKey(command.Data.Name)) return;
             await SlashCommands[command.Data.Name].Execute(command, _service);
         }

@@ -11,6 +11,8 @@
 
         public bool AutoLeave { get; set; }
 
+        public bool ShowActivity { get; set; }
+
         public string HelpCommandName { get; set; }
 
         public string JoinCommandName { get; set; }
