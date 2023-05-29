@@ -18,6 +18,8 @@ https://github.com/yurisi0212/DiscordMusicBot-dotNet/releases
 
 リリースから最新バージョンをダウンロードしてください。
 
+[NET6.0 Runtime](https://dotnet.microsoft.com/ja-jp/download/dotnet/6.0)が必要な可能性がありますので必要に応じてダウンロードしてください。
+
 settings.iniのTokenにDiscordDeveloperPortalから取得したトークンを貼り付け、必要であれば他のオプションも変更してください。
 
 settings.iniのGrobalがtrueの場合コマンドが登録されるまで時間がかかりますのでお待ち下さい。(discordの仕様です)
