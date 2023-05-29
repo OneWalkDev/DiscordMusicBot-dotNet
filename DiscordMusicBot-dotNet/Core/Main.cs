@@ -20,12 +20,15 @@ namespace DiscordMusicBot_dotNet.Core {
             _client.Log += LogHandler;
             _client.Ready += ReadyHandler;
             _client.SlashCommandExecuted += SlashCommandManager.SlashCommandExecutedHandler;
-            if (Setting.Data.ShowActivity) _client.JoinedGuild += JoinedGuildHundler;
-            if (Setting.Data.ShowActivity) _client.LeftGuild += LeftGuildHundler;
-            _client.UserVoiceStateUpdated += UserVoiceStateUpdatedHandler;
+            if (Setting.Data.AutoLeave) _client.UserVoiceStateUpdated += UserVoiceStateUpdatedHandler;
             await _client.LoginAsync(TokenType.Bot, Setting.Data.Token);
             await _client.StartAsync();
-
+            if (Setting.Data.ShowActivity) {
+                while (true) {
+                    await ClientSetGameAsync();
+                    await Task.Delay(10000);
+                }
+            }
             await Task.Delay(-1);
         }
 
@@ -51,32 +54,18 @@ namespace DiscordMusicBot_dotNet.Core {
         private async Task ReadyHandler() {
             _service = new AudioService(_client);
             SlashCommandManager.RegisterSlashCommand(_client, _service);
-            await ClientSetGameAsync();
+            await _client.SetGameAsync("");
+            if (Setting.Data.ShowActivity) await ClientSetGameAsync();
         }
 
         private async Task UserVoiceStateUpdatedHandler(SocketUser user, SocketVoiceState before, SocketVoiceState after) {
-
-            if (Setting.Data.ShowActivity) {
-                await ClientSetGameAsync();
-            }
-
-            if (Setting.Data.AutoLeave) {
-                var beforeVC = before.VoiceChannel;
-                if (beforeVC == null) return;
-                if (beforeVC.ConnectedUsers.Any(u => u.Id == _client.CurrentUser.Id)) {
-                    if (beforeVC.ConnectedUsers.Count == 1) {
-                        await _service.LeaveAudio(before.VoiceChannel.Guild.Id);
-                    }
+            var beforeVC = before.VoiceChannel;
+            if (beforeVC == null) return;
+            if (beforeVC.ConnectedUsers.Any(u => u.Id == _client.CurrentUser.Id)) {
+                if (beforeVC.ConnectedUsers.Count == 1) {
+                    await _service.LeaveAudio(before.VoiceChannel.Guild.Id);
                 }
             }
-        }
-
-        private async Task JoinedGuildHundler(SocketGuild guild) {
-            await ClientSetGameAsync();
-        }
-
-        private async Task LeftGuildHundler(SocketGuild guild) {
-            await ClientSetGameAsync();
         }
 
         private async Task ClientSetGameAsync() {
