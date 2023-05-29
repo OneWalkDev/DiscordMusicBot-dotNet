@@ -166,7 +166,6 @@ namespace DiscordMusicBot_dotNet.Services {
                 } finally {
                     container.QueueManager.AudioPlayer.PlaybackState = Assistor.PlaybackState.Stopped;
                     await audioOutStream.FlushAsync();
-                    await _discord.SetGameAsync(null);
                     container.CancellationTokenSource = new CancellationTokenSource();
                     if (container.QueueManager.AudioPlayer.NextPlay) {
                         var next = container.QueueManager.Next();
