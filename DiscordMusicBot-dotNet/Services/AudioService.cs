@@ -32,12 +32,10 @@ namespace DiscordMusicBot_dotNet.Services {
 
         private async Task joinVoiceChat(ulong? guild, IMessageChannel channel, IVoiceChannel target) {
             if (guild == null) return;
-            if (_connectedChannels.TryGetValue((ulong)guild, out _)) return;
             if (!(target is IVoiceChannel)) {
                 await channel.SendMessageAsync("ERROR >> BOTが参加できませんでした。あなた自身がこのBOTを入れたいVCに参加する必要があります。");
                 return;
             }
-            if (target.Guild.Id != guild) return;
 
             var player = new AudioPlayer();
 
