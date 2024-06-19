@@ -4,6 +4,10 @@ Discordの音楽bot
 
 Discord.netを使用しています。
 
+こちらは開発終了しました
+
+後継はこちらです [DiscordMusicBot.py](https://github.com/OneWalkDev/DiscordMusicBot.py)
+
 ## 概要 
 
 Discordでダウンロードせずyoutubeの音楽を流すbotです。 
